@@ -1,0 +1,42 @@
+{
+  "name": "DuoStatic — Academia Carmesim",
+  "short_name": "DuoStatic",
+  "description": "Trilha gamificada de Estatística Aplicada, com exercícios, fluxogramas e estudo offline.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#110d12",
+  "theme_color": "#981b37",
+  "icons": [
+    {
+      "src": "./assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "education"
+  ],
+  "shortcuts": [
+    {
+      "name": "Treino de Estatística",
+      "short_name": "Treinar",
+      "url": "./",
+      "icons": [
+        {
+          "src": "./assets/app-icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
