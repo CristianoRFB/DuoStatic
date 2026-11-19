@@ -24,6 +24,20 @@
    return s;
  }
  let state=readState();
+ let flowStep=0;
+ let demoCache={};
+ function getDemo(id){
+   const key=id+"_"+state.settings.values;
+   if(!demoCache[key]){
+     const kind={amostra:"sampleProp",prop:"prop",media:"mean",corr:"pearson",reg:"regression",z:"z"}[id];
+     const seed=DATA.questions.find(x=>x.t===id&&x.kind===kind);
+     if(!seed)throw new Error("Exemplo visual ausente: "+id);
+     demoCache[key]=buildQuestion(seed);
+   }
+   return demoCache[key];
+ }
+ function lab(id,q){return window.DUO_FLOW?window.DUO_FLOW.render(id,q,flowStep):"";}
+
  function save(){try{localStorage.setItem(KEY,JSON.stringify({...state,session:null}))}catch(err){console.warn("Navegação privada: progresso não persistido.",err)}}
  function topic(id){return DATA.topics.find(t=>t.id===id)||DATA.topics[0]}
  function format(n,d=2){return Number(n).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})}
@@ -74,6 +88,7 @@
      items=pickOptions(label,shuffle(wrong));q.context="Valor observado: "+format(v,Number.isInteger(v)?0:1)+" "+seed.unit+" · média: "+format(m,Number.isInteger(m)?0:1)+" · desvio padrão: "+format(sd,Number.isInteger(sd)?0:1);
      q.why="z = ("+format(v,Number.isInteger(v)?0:1)+" − "+format(m,Number.isInteger(m)?0:1)+") ÷ "+format(sd,Number.isInteger(sd)?0:1)+" = "+format(z,2)+". O sinal mostra de que lado da média está; a distância mede os desvios. Importante: ser incomum não é automaticamente ruim.";
      q.cue="Valor observado + média + desvio padrão → Escore Z.";
+     q.calc={kind:"z",v,mean:m,sd,z,unit:seed.unit};
      q.path=["Valor individual","Compare com a média","Divida pelo desvio","Classifique o sinal e |z|"];q.zValue=z;
    }else if(seed.kind==="compareZ"){
      let a=[seed.aVal,seed.aMean,seed.aSd],b=[seed.bVal,seed.bMean,seed.bSd];
@@ -85,6 +100,7 @@
      q.context="A: "+a.join(" / ")+" (valor / média / DP) · B: "+b.join(" / ");
      q.why="z(A) = "+format(za,2)+" e z(B) = "+format(zb,2)+". O maior escore indica melhor resultado RELATIVO quando maior desempenho é desejável.";
      q.cue="Compare os escores padronizados, não os valores brutos.";
+     q.calc={kind:"compareZ",a,b,za,zb};
      q.path=["Identifique os dois grupos","Calcule z para cada um","Compare z(A) e z(B)","Escolha o maior desempenho relativo"];
    }else if(seed.kind==="mean"){
      let m=seed.mean,sd=seed.sd,n=seed.n,conf=seed.conf;
@@ -100,6 +116,7 @@
      items=pickOptions(good,wrong);q.context="Média amostral: "+format(m,d)+" "+seed.unit+" · desvio padrão: "+format(sd,d)+" · n = "+n+" · confiança = "+conf+"%.";
      q.why="Primeiro determine z = "+format(zCritical(conf),3)+". Depois, margem = z × "+format(sd,d)+" ÷ √"+n+" ≈ "+format(margin,d)+". A faixa é a média menos a margem até a média mais a margem: "+good+".";
      q.cue="A palavra MÉDIA e um desvio padrão indicam IC da média.";
+     q.calc={kind:"mean",mean:m,sd,n,conf,z:zCritical(conf),margin,lo:m-margin,hi:m+margin,unit:seed.unit};
      q.path=["Estimar uma média","Encontre média, DP e n","Calcule a margem","Média ± margem"];
      q.interval={lo:m-margin,hi:m+margin,center:m};
    }else if(seed.kind==="prop"){
@@ -114,6 +131,7 @@
      q.context=successes+" "+seed.event+" de "+n+" observações · confiança = "+conf+"%.";
      q.why="p = "+successes+" ÷ "+n+" = "+pct(p,1)+". Margem = "+format(zCritical(conf),3)+" × √[p(1−p)/n] ≈ "+pct(margin,1)+" ponto(s) percentuais. IC: "+right+".";
      q.cue="Uma contagem de casos dentro de um total → proporção, não média.";
+     q.calc={kind:"prop",success:successes,n,conf,p,z:zCritical(conf),margin,lo:p-margin,hi:p+margin,event:seed.event};
      q.path=["Defina o evento","p = casos / total","Margem percentual","p ± margem"];q.success=successes;q.n=n;
    }else if(seed.kind==="sampleMean"){
      let sd=seed.sd,err=seed.error,conf=seed.conf;
@@ -124,6 +142,7 @@
      q.context="Desvio padrão conhecido: "+format(sd,0)+" "+seed.unit+" · erro máximo: "+format(err,0)+" "+seed.unit+" · confiança: "+conf+"%.";
      q.why="Para planejar uma MÉDIA: n = (z × σ / E)². Aqui: ("+format(zCritical(conf),3)+" × "+format(sd,0)+" / "+format(err,0)+")² = "+format(((zCritical(conf)*sd)/err)**2,2)+". Arredonde para cima: "+n+".";
      q.cue="Número mínimo de medições + desvio padrão + erro máximo → n da média.";
+     q.calc={kind:"sampleMean",sd,err,conf,z:zCritical(conf),n,raw:((zCritical(conf)*sd)/err)**2};
      q.path=["Planeje uma média","Encontre σ, E e confiança","Calcule n = (zσ/E)²","Arredonde para cima"];
    }else if(seed.kind==="sampleProp"){
      let p=seed.p,err=seed.error,conf=seed.conf;
@@ -134,6 +153,7 @@
      q.context="Proporção anterior: "+pct(p,0)+" · erro máximo: "+pct(err,0)+" · confiança: "+conf+"%.";
      q.why="Para planejar uma PROPORÇÃO: n = z² × p(1−p) / E². Resultado ≈ "+format(raw,2)+"; arredondando para cima, "+n+" observações.";
      q.cue="Pergunta 'quantos?' e fornece taxa conhecida → n de proporção.";
+     q.calc={kind:"sampleProp",p,err,conf,z:zCritical(conf),n,raw};
      q.path=["Planeje uma porcentagem","Encontre p, E e confiança","Calcule z²p(1−p)/E²","Arredonde para cima"];
    }else if(seed.kind==="pearson"){
      let pairs=listPairs(seed.dataset);
@@ -150,6 +170,7 @@
      q.context=pairs.length+" pares (X, Y). Primeiros dados: "+pairs.slice(0,4).map(([x,y])=>"("+x+"; "+y+")").join(", ")+"…";
      q.why="Calculando o coeficiente de Pearson para os "+pairs.length+" pares, r ≈ "+format(r,3)+". O sinal mostra o sentido e |r| indica a intensidade; aqui a relação é "+label+".";
      q.cue="Duas colunas quantitativas + pedido de força/direção → Pearson.";
+     q.calc={kind:"pearson",pairs,r};
      q.path=["Identifique pares X e Y","Faça o gráfico de dispersão","Calcule r (−1 a +1)","Explique sinal e intensidade"];
      q.pairs=pairs;q.diagram="scatter";
    }else if(seed.kind==="regression"){
@@ -161,6 +182,7 @@
      q.context=pairs.length+" pares observados. Use X = "+format(target,0)+". Primeiros dados: "+pairs.slice(0,3).map(([x,y])=>"("+x+"; "+y+")").join(", ")+"…";
      q.why="A reta ajustada tem inclinação a ≈ "+format(a,4)+" e intercepto b ≈ "+format(b,3)+". Portanto y ≈ "+format(a,4)+" × "+format(target,0)+" + ("+format(b,3)+") = "+format(pred,d)+".";
      q.cue="Um X novo e um Y previsto → regressão, não apenas correlação.";
+     q.calc={kind:"regression",pairs,a,b,target,pred};
      q.path=["Defina X e Y","Ajuste y = ax + b","Substitua X = "+format(target,0),"Interprete Y previsto"];
      q.pairs=pairs;q.diagram="line";
    }
@@ -197,7 +219,7 @@
  function renderTrail(){
    return '<div class="trail">'+DATA.topics.map((t,i)=>{
       const count=state.progress[t.id]||0;
-      return '<section class="trail-world"><div class="world-heading"><strong>'+t.number+' · '+t.title+'</strong><small>'+t.subtitle+' — '+count+'/4 etapas</small></div><div class="path-nodes">'+t.stages.map((stage,j)=>{
+      return '<section class="trail-world"><div class="world-heading"><strong>'+t.number+' · '+t.title+'</strong><small>'+'Prioridade '+(i+1)+' · '+t.priorityDate+' · '+count+'/4 etapas</small></div><div class="path-nodes">'+t.stages.map((stage,j)=>{
         const unlocked=j<=count,done=j<count;
         return '<div class="node-row"><div class="node-wrap"><button class="node '+(done?'done':unlocked?'active':'locked')+'" data-action="stage" data-topic="'+t.id+'" data-stage="'+j+'" '+(!unlocked?'disabled aria-disabled="true"':'')+' aria-label="'+t.title+', etapa '+(j+1)+': '+esc(stage)+'">'+(done?'✓':!unlocked?'♢':j===0?'⌂':j===3?'♛':'✦')+'</button><span class="node-label">'+esc(stage)+'</span></div></div>';
       }).join("")+'</div></section>';
@@ -206,20 +228,20 @@
  function home(){
    return '<div class="view">'+heroIntro()+'<div class="section-top"><div><h2>Seu progresso</h2><p>Aprender é reconhecer padrões, não memorizar símbolos.</p></div><span class="pill">✧ '+(Object.values(state.progress).reduce((a,b)=>a+b,0))+'/24 etapas</span></div>'+
    '<div class="stats-grid"><div class="stat"><strong>'+state.xp+'</strong><small>Experiência</small></div><div class="stat"><strong>'+state.total+'</strong><small>Questões feitas</small></div><div class="stat"><strong>'+(state.total?Math.round(100*state.correct/state.total):0)+'%</strong><small>Acertos</small></div></div>'+
-   '<div class="section-top"><div><h2>A trilha carmesim</h2><p>Quatro etapas por território. Avance do conceito à interpretação.</p></div></div>'+renderTrail()+'</div>';
+   '<div class="section-top"><div><h2>A trilha carmesim</h2><p>Dos materiais mais recentes aos mais antigos. Quatro etapas por território.</p></div></div>'+renderTrail()+'</div>';
  }
  function intro(){
    const {topic:tid,stage}=state.session,t=topic(tid);
    return '<div class="view"><button class="back" data-nav="trilha">‹ Voltar à trilha</button><p class="eyebrow">TERRITÓRIO '+t.number+' · ETAPA '+(stage+1)+' DE 4</p><div class="story"><div class="story-card"><span class="pill">'+t.icon+' '+esc(t.stages[stage])+'</span><h1 style="margin-top:16px">'+t.title+'</h1><h3 style="color:var(--gold)">O que é?</h3><p>'+t.what+'</p><h3 style="color:var(--gold)">Para que serve?</h3><p>'+t.function+'</p><h3 class="gold">Pra que serve (no português claro)?</h3><p class="plain-explainer">'+esc(t.plain)+'</p><div class="notice">Imagine: '+t.analogy+'</div></div><div class="story-diagram">'+draw(t.visual)+'<span class="pill">Pense visualmente</span><p class="muted tiny">'+esc(t.short)+'</p><img src="assets/arle-sentada.webp" alt="Arlecchino chibi sentada, acompanhando a explicação" class="intro-mascot" loading="lazy" decoding="async"></div></div>'+
    '<div class="section-top"><div><h2>Como reconhecer?</h2><p>Este é o caminho de decisão para os exercícios.</p></div></div><div class="surface"><p><strong class="gold">Palavras-pista:</strong> '+t.cue+'</p>'+flow(t.steps)+'<div class="formula-box"><strong>Fórmula só depois de entender</strong><code>'+esc(t.formula)+'</code></div><div class="notice"><strong>Armadilha clássica:</strong> '+t.trap+'</div></div>'+
-   '<div class="quick-actions"><button class="btn btn-quiet" data-nav="biblioteca">Consultar biblioteca</button><button class="btn btn-primary" data-action="begin">Entendi · testar agora ›</button></div></div>';
+   lab(t.id,getDemo(t.id))+'<div class="quick-actions"><button class="btn btn-quiet" data-nav="biblioteca">Consultar biblioteca</button><button class="btn btn-primary" data-action="begin">Entendi · testar agora ›</button></div></div>';
  }
  function renderQuiz(){
    const s=state.session,q=s.question,t=topic(q.t);
    const target=s.kind==="lesson"?lessonCount(s.stage):null;
    return '<div class="view"><button class="back" data-nav="'+(s.kind==="lesson"?"trilha":"infinito")+'">‹ Sair do desafio</button><div class="module-counter"><span class="pill">'+(s.kind==="infinite"?"∞ TREINO INFINITO":t.number+" · "+esc(t.title))+'</span><div class="bar-track" aria-label="Progresso"><div class="bar-fill" style="width:"'+(target?100*s.count/target:Math.min(100,s.count%10*10))+'%"></div></div><span class="question-tick">'+(s.count+(s.chosen===null?1:0))+(target?"/"+target:" · ∞")+'</span></div>'+
    '<div class="quiz-layout"><section class="question-card"><div class="question-head"><h2>'+esc(q.label||t.title)+'</h2><span class="pill">✦ +15 XP</span></div><div class="question-context">'+esc(q.context||"Leia atentamente a situação e reconheça o conceito central antes de calcular.")+'</div><p class="question-prompt">'+esc(q.prompt)+'</p><button class="btn btn-quiet" data-action="speak" style="margin:0 0 15px;padding:9px 14px;min-height:40px">♫ Ouvir enunciado</button><div class="choices" role="group" aria-label="Alternativas">'+q.opts.map((o,i)=>'<button class="choice '+(s.chosen!==null?(i===q.right?"correct":i===s.chosen?"incorrect":"dim"):"")+'" data-answer="'+i+'" '+(s.chosen!==null?"disabled":"")+'><span class="key">'+(i+1)+'</span>'+esc(o)+'</button>').join("")+'</div>'+
-   (s.chosen===null?'<details style="margin-top:17px;color:var(--soft)"><summary style="cursor:pointer">Precisa de uma pista para interpretar?</summary><p style="padding:10px 0 0;color:var(--gold)">'+esc(q.cue||t.cue)+'</p></details>':'<div class="feedback '+(s.chosen===q.right?"":"bad")+' pop" role="status"><div class="feedback-body"><strong>'+(s.chosen===q.right?"✦ Muito bem! Você identificou o caminho.":"A interpretação correta é: "+esc(q.opts[q.right]))+'</strong><p>'+esc(q.why)+'</p><strong style="font-size:1rem;color:var(--gold)">Fluxograma deste exercício</strong>'+flow(q.path)+'<small>Fonte: '+esc(q.src||"Conteúdo da aula")+'</small></div><img class="feedback-mascot" src="assets/arle-'+(s.chosen===q.right?"vitoria":"irritada")+'.webp" alt="'+(s.chosen===q.right?"Arlecchino comemorando o acerto":"Arlecchino com expressão irritada")+'" loading="lazy" decoding="async"></div>')+
+   (s.chosen===null?'<details style="margin-top:17px;color:var(--soft)"><summary style="cursor:pointer">Precisa de uma pista para interpretar?</summary><p style="padding:10px 0 0;color:var(--gold)">'+esc(q.cue||t.cue)+'</p></details>':'<div class="feedback '+(s.chosen===q.right?"":"bad")+' pop" role="status"><div class="feedback-body"><strong>'+(s.chosen===q.right?"✦ Muito bem! Você identificou o caminho.":"A interpretação correta é: "+esc(q.opts[q.right]))+'</strong><p>'+esc(q.why)+'</p><strong style="font-size:1rem;color:var(--gold)">Fluxograma deste exercício</strong>'+flow(q.path)+lab(q.t,q)+'<small>Fonte: '+esc(q.src||"Conteúdo da aula")+'</small></div><img class="feedback-mascot" src="assets/arle-'+(s.chosen===q.right?"vitoria":"irritada")+'.webp" alt="'+(s.chosen===q.right?"Arlecchino comemorando o acerto":"Arlecchino com expressão irritada")+'" loading="lazy" decoding="async"></div>')+
    '<div class="quick-actions">'+(s.chosen!==null?'<button class="btn btn-primary" data-action="next">'+(s.kind==="infinite"?"Próxima questão ∞":"Continuar a trilha ›")+'</button>':'<span class="tiny muted">Use as teclas 1–4 para responder.</span>')+'</div></section>'+
    '<aside class="quiz-aside"><div><h3>Observe a pista</h3><p>'+esc(s.chosen===null?"Olhe o gráfico e faça uma pergunta: estou comparando, prevendo, estimando uma faixa ou procurando um valor incomum?":q.cue||t.cue)+'</p><div class="divider"></div><span class="tag-source">'+esc(q.src||"Aula de Estatística")+'</span><img class="aside-mascot" src="assets/arle-pensativa.webp" alt="Arlecchino pensativa" loading="lazy" decoding="async"></div><div class="diagram">'+draw(q.diagram,q)+'</div></aside></div></div>';
  }
@@ -233,7 +255,7 @@
  }
  function library(){
   const t=topic(state.libraryTopic);
-  return '<div class="view"><p class="eyebrow">▤ CÓDICE DE ESTUDO</p><h1>Biblioteca de conceitos</h1><p class="subheading">Leia no seu ritmo. Explicações, palavras-pista, fluxogramas e um desenho para cada tema, sem enxurrada de fórmulas.</p><div class="library-nav">'+DATA.topics.map(x=>'<button class="'+(x.id===t.id?"active":"")+'" data-action="library" data-topic="'+x.id+'">'+x.icon+' '+x.title+'</button>').join("")+'</div><div class="story"><div class="story-card"><p class="eyebrow">CAPÍTULO '+t.number+'</p><h2>'+t.title+'</h2><h3 class="gold">O que é?</h3><p>'+t.what+'</p><h3 class="gold">Para que serve?</h3><p>'+t.function+'</p><h3 class="gold">Pra que serve (no português claro)?</h3><p class="plain-explainer">'+esc(t.plain)+'</p><h3 class="gold">Pense neste exemplo</h3><p>'+t.analogy+'</p></div><div class="story-diagram">'+draw(t.visual)+'<p class="muted">'+t.short+'</p><img class="library-mascot" src="assets/arle-pensativa.webp" alt="Arlecchino pensativa" loading="lazy" decoding="async"></div></div><div class="guide-card"><h3>Como decidir se a questão pede este tema</h3><p><strong class="gold">Procure:</strong> '+t.cue+'</p>'+flow(t.steps)+'<div class="formula-box"><strong>Quando chegar a hora de calcular</strong><code>'+esc(t.formula)+'</code></div><div class="notice"><strong>Não caia nesta armadilha:</strong> '+t.trap+'</div></div><div class="quick-actions"><button class="btn btn-primary" data-action="library-practice" data-topic="'+t.id+'">Praticar este assunto ›</button></div></div>'
+  return '<div class="view"><p class="eyebrow">▤ CÓDICE DE ESTUDO</p><h1>Biblioteca de conceitos</h1><p class="subheading">Leia no seu ritmo. Explicações, palavras-pista, fluxogramas e um desenho para cada tema, sem enxurrada de fórmulas.</p><div class="library-nav">'+DATA.topics.map(x=>'<button class="'+(x.id===t.id?"active":"")+'" data-action="library" data-topic="'+x.id+'">'+x.icon+' '+x.title+'</button>').join("")+'</div><div class="story"><div class="story-card"><p class="eyebrow">CAPÍTULO '+t.number+'</p><h2>'+t.title+'</h2><h3 class="gold">O que é?</h3><p>'+t.what+'</p><h3 class="gold">Para que serve?</h3><p>'+t.function+'</p><h3 class="gold">Pra que serve (no português claro)?</h3><p class="plain-explainer">'+esc(t.plain)+'</p><h3 class="gold">Pense neste exemplo</h3><p>'+t.analogy+'</p></div><div class="story-diagram">'+draw(t.visual)+'<p class="muted">'+t.short+'</p><img class="library-mascot" src="assets/arle-pensativa.webp" alt="Arlecchino pensativa" loading="lazy" decoding="async"></div></div><div class="guide-card"><h3>Como decidir se a questão pede este tema</h3><p><strong class="gold">Procure:</strong> '+t.cue+'</p>'+flow(t.steps)+'<div class="formula-box"><strong>Quando chegar a hora de calcular</strong><code>'+esc(t.formula)+'</code></div><div class="notice"><strong>Não caia nesta armadilha:</strong> '+t.trap+'</div></div>'+lab(t.id,getDemo(t.id))+'<div class="quick-actions"><button class="btn btn-primary" data-action="library-practice" data-topic="'+t.id+'">Praticar este assunto ›</button></div></div>'
  }
  function settings(){
   const real=state.settings.values==="real",reduced=state.settings.reducedMotion;
@@ -248,13 +270,13 @@
    if(headerXP)headerXP.textContent=state.xp;
    if(headerStreak)headerStreak.textContent=state.streak;
  }
- function go(view){if(!["trilha","infinito","biblioteca","configuracoes"].includes(view))view="trilha";state.view=view;save();render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"})}
+ function go(view){if(!["trilha","infinito","biblioteca","configuracoes"].includes(view))view="trilha";state.view=view;flowStep=0;save();render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"})}
  function lessonCount(stage){const t=state.session?.topic;const pool=DATA.questions.filter(q=>q.t===t&&q.level<=stage).length;return Math.max(1,Math.min(stage===0?3:stage===1?4:5,pool))}
  function prepareLesson(tid,stage){
    if(!DATA.topics.some(t=>t.id===tid))return;
    const unlocked=state.progress[tid]||0;
    if(stage>unlocked)return;
-   state.session={kind:"lesson",topic:tid,stage,asked:[],count:0,correct:0,gained:0,chosen:null,question:null};state.view="intro";render();window.scrollTo(0,0)
+   state.session={kind:"lesson",topic:tid,stage,asked:[],count:0,correct:0,gained:0,chosen:null,question:null};flowStep=0;state.view="intro";render();window.scrollTo(0,0)
  }
  function begin(){
    const s=state.session;if(!s)return;
@@ -276,7 +298,7 @@
    const chosen=rand(pool);
    if(!remaining.length)s.asked=[];
    s.asked.push(DATA.questions.indexOf(chosen));
-   s.question=buildQuestion(chosen);s.chosen=null;
+   s.question=buildQuestion(chosen);s.chosen=null;flowStep=0;
    render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"});
  }
  function playSound(){
@@ -292,7 +314,7 @@
  function answer(index){
    const s=state.session;
    if(state.view!=="quiz"||!s||s.chosen!==null||index<0||index>=s.question.opts.length)return;
-   s.chosen=index;
+   s.chosen=index;flowStep=0;
    const good=index===s.question.right;
    s.correct+=good?1:0;s.count+=1;
    const gain=good?15:3;s.gained+=gain;state.xp+=gain;
@@ -322,6 +344,17 @@
    switch(action){
      case"continue":{const t=DATA.topics.find(x=>(state.progress[x.id]||0)<4)||DATA.topics[0];prepareLesson(t.id,Math.min(3,state.progress[t.id]||0));break}
      case"stage":prepareLesson(el.dataset.topic,Number(el.dataset.stage));break;
+     case"calc-step":{
+       const n=Number(el.dataset.step);
+       if(!Number.isInteger(n)||n<0||n>6)break;
+       flowStep=n;
+       const before=Number.isFinite(window.scrollY)?window.scrollY:0;
+       render();
+       window.scrollTo(0,before);
+       const active=root.querySelector(".calc-node.is-current");
+       if(active&&active.focus)active.focus({preventScroll:true});
+       break;
+     }
      case"begin":begin();break;
      case"next":nextQuestion();break;
      case"repeat":prepareLesson(state.session.topic,state.session.stage);break;
@@ -339,9 +372,9 @@
      case"start-infinite":startInfinite();break;
      case"toggle-topic":updateTopic(el.dataset.topic);break;
      case"all":state.selectedTopics=[];save();render();break;
-     case"library":state.libraryTopic=el.dataset.topic;save();render();break;
+     case"library":state.libraryTopic=el.dataset.topic;flowStep=0;save();render();break;
      case"library-practice":prepareLesson(el.dataset.topic,Math.min(3,state.progress[el.dataset.topic]||0));break;
-     case"mode":state.settings.values=el.dataset.value==="random"?"random":"real";save();render();break;
+     case"mode":state.settings.values=el.dataset.value==="random"?"random":"real";demoCache={};flowStep=0;save();render();break;
      case"reset":if(window.confirm("Apagar todo o progresso, XP e preferências salvos neste navegador?")){state=defaultState();save();render()}break;
    }
  }
