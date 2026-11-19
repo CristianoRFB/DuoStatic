@@ -17,5 +17,8 @@ jobs:
         run: |
           node --check js/dados.js
           node --check js/app.js
+          node --check js/fluxo.js
+          node --check js/offline.js
+          node --check sw.js
       - name: Executar testes
         run: node --test tests/smoke.test.js
