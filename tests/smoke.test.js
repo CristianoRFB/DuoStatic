@@ -22,6 +22,7 @@ function makeApp(){
   const localStorage={getItem:key=>store.get(key)||null,setItem:(key,val)=>store.set(key,val)};
   const sandbox={window,document,localStorage,console,Math};
   vm.runInNewContext(read("js/dados.js"),sandbox,{filename:"dados.js"});
+  vm.runInNewContext(read("js/fluxo.js"),sandbox,{filename:"fluxo.js"});
   const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,go,answer,prepareLesson,begin,nextQuestion,getState:()=>state,root};render();})();");
   assert.match(source,/window\.__test/,"Não foi possível montar o teste de integração");
   vm.runInNewContext(source,sandbox,{filename:"app.js"});
@@ -94,4 +95,60 @@ test("explicação em português claro aparece em todos os temas e nas duas tela
     debug.go("biblioteca");
     assert.match(app.innerHTML,/Pra que serve \(no português claro\)\?/);
   }
+});
+
+
+test("ordem de prioridade preserva os temas e o progresso por ID",()=>{
+  const {window,debug,app}=makeApp();
+  const expected=["amostra","prop","media","corr","reg","z"];
+  assert.deepEqual(Array.from(window.STUDY_DATA.topics,t=>t.id),expected);
+  assert.match(app.innerHTML,/Prioridade 1 · 10 de novembro/);
+  debug.getState().progress.corr=2;
+  debug.go("trilha");
+  assert.equal(debug.getState().progress.corr,2);
+});
+test("cada cálculo real e aleatório oferece fluxo e SVG com resultado coerente",()=>{
+  const {window,debug}=makeApp();
+  const data=window.STUDY_DATA;
+  for(const mode of ["real","random"]){
+    debug.getState().settings.values=mode;
+    for(const seed of data.questions){
+      const q=debug.buildQuestion(seed);
+      assert.doesNotMatch(q.opts.join(" "),/NaN|Infinity/);
+      const flow=window.DUO_FLOW.stepsFor(seed.t,q);
+      assert.ok(flow.steps.length>=3,seed.t+" "+seed.kind);
+      assert.ok(flow.steps.every(step=>step.label&&step.detail),seed.kind);
+      const html=window.DUO_FLOW.render(seed.t,q,0);
+      assert.match(html,/Fluxo do cálculo/);
+      assert.match(html,/data-action="calc-step"/);
+      assert.match(html,/<svg /);
+      if(q.calc){
+        assert.equal(flow.steps.at(-1).value.includes("NaN"),false,seed.kind);
+      }
+    }
+  }
+});
+test("precache offline inclui todos os recursos reais e o modo instalável",()=>{
+  const manifest=JSON.parse(read("manifest.webmanifest"));
+  assert.equal(manifest.display,"standalone");
+  assert.ok(manifest.icons.some(x=>x.src.endsWith(".svg")));
+  const listeners={};
+  const sandbox={self:{addEventListener:(name,cb)=>{listeners[name]=cb},location:{origin:"https://example.test"}}};
+  vm.runInNewContext(read("sw.js")+"\nself.__filesToCache=OFFLINE_ASSETS;",sandbox,{filename:"sw.js"});
+  const precache=Array.from(sandbox.self.__filesToCache);
+  for(const item of precache){
+    assert.ok(fs.existsSync(path.join(root,item)),item+" está no precache mas não no repositório");
+  }
+  assert.ok(precache.some(x=>x.endsWith("fluxo.js")));
+  assert.ok(precache.some(x=>x.endsWith("offline.js")));
+  assert.ok(precache.some(x=>x.endsWith("manifest.webmanifest")));
+  assert.ok(listeners.install&&listeners.activate&&listeners.fetch);
+});
+test("biblioteca e lições exibem visualização conectada com cálculos",()=>{
+  const {debug,app}=makeApp();
+  debug.prepareLesson("amostra",0);
+  assert.match(app.innerHTML,/Fluxo do cálculo/);
+  assert.match(app.innerHTML,/Amostra|Calcular n/);
+  debug.go("biblioteca");
+  assert.match(app.innerHTML,/calc-sequence/);
 });
