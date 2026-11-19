@@ -80,3 +80,18 @@ test("biblioteca, treino infinito e configurações navegam",()=>{
   debug.go("infinito");assert.match(app.innerHTML,/O ritual infinito/);
   debug.go("configuracoes");assert.match(app.innerHTML,/Dados reais/);
 });
+
+test("explicação em português claro aparece em todos os temas e nas duas telas",()=>{
+  const {window,debug,app}=makeApp();
+  for(const t of window.STUDY_DATA.topics){
+    assert.ok(t.plain?.startsWith("Serve pra calcular"),"Texto de português claro ausente em "+t.id);
+    assert.match(t.plain,/É usado quando o exercício mete o louco/);
+    debug.getState().progress[t.id]=0;
+    debug.prepareLesson(t.id,0);
+    assert.match(app.innerHTML,/Pra que serve \(no português claro\)\?/);
+    assert.match(app.innerHTML,/Serve pra calcular/);
+    debug.getState().libraryTopic=t.id;
+    debug.go("biblioteca");
+    assert.match(app.innerHTML,/Pra que serve \(no português claro\)\?/);
+  }
+});
