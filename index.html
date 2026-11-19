@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#130d12">
+  <meta name="description" content="Aprenda estatística aplicada à interpretação de enunciados com uma trilha gamificada, desafios reais e treino infinito.">
+  <title>DuoStatic — Academia Carmesim</title>
+  <link rel="icon" href="assets/mascote.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/dados.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+ <div class="bg-glow" aria-hidden="true"></div>
+ <div class="shell">
+   <aside class="sidebar">
+    <a class="brand" href="#trilha" aria-label="Academia Carmesim, início"><span class="crest">✥</span><span><strong>DuoStatic</strong><small>ACADEMIA CARMESIM</small></span></a>
+    <nav class="desktop-nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-nav="trilha"><span>⌂</span> Trilha de estudo</button>
+      <button class="nav-item" data-nav="infinito"><span>∞</span> Treino infinito</button>
+      <button class="nav-item" data-nav="biblioteca"><span>▤</span> Biblioteca</button>
+      <button class="nav-item" data-nav="configuracoes"><span>⚙</span> Configurações</button>
+    </nav>
+    <div class="side-foot">
+      <div class="side-character"><img src="assets/mascote.svg" alt="Mascote chibi de cabelos claros e detalhes escarlates"><span>“Entenda o pedido antes de escolher a fórmula.”</span></div>
+      <p>Feito para estudar a Estatística Aplicada da profa. Andrea P. Silva.</p>
+    </div>
+   </aside>
+   <div class="main-wrap">
+     <header class="topbar">
+       <button class="mobile-brand" data-nav="trilha" aria-label="Início">✥ <span>DuoStatic</span></button>
+       <span class="topbar-kicker">FATEC · ESTATÍSTICA APLICADA</span>
+       <div class="top-stats"><span title="Experiência acumulada">✦ <b id="header-xp">0</b> XP</span><span title="Acertos seguidos">♨ <b id="header-streak">0</b></span><button title="Configurações" aria-label="Configurações" data-nav="configuracoes">⚙</button></div>
+     </header>
+     <main id="app" tabindex="-1" aria-live="polite"></main>
+     <footer class="footer">DuoStatic · Projeto independente de estudo. Conteúdo elaborado a partir dos materiais fornecidos em aula.</footer>
+   </div>
+ </div>
+ <nav class="mobile-nav" aria-label="Navegação mobile">
+   <button data-nav="trilha"><b>⌂</b><small>Trilha</small></button>
+   <button data-nav="infinito"><b>∞</b><small>Infinito</small></button>
+   <button data-nav="biblioteca"><b>▤</b><small>Teoria</small></button>
+   <button data-nav="configuracoes"><b>⚙</b><small>Ajustes</small></button>
+ </nav>
+ <noscript>Ative o JavaScript para acessar os desafios interativos.</noscript>
+</body>
+</html>
