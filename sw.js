@@ -1,6 +1,6 @@
 /* DuoStatic — estudo offline. Mude a versão ao atualizar a lista de arquivos. */
 const CACHE_PREFIX="duostatic-app-";
-const CACHE_VERSION="duostatic-app-v2026-11-19-2";
+const CACHE_VERSION="duostatic-app-v2026-11-19-3";
 const OFFLINE_ASSETS=[
  "./",
  "./index.html",
@@ -47,7 +47,8 @@ self.addEventListener("fetch",event=>{
    try{
      const response=await fetch(req);
      if(response.ok&&response.type!=="opaque"){
-       await cache.put(req,response.clone());
+       // Falha por falta de espaço no cache não pode derrubar uma página online.
+       try{await cache.put(req,response.clone())}catch(error){console.warn("Cache sem espaço:",error)}
      }
      return response;
    }catch(_networkError){
