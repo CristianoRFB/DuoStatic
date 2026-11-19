@@ -8,9 +8,14 @@
   <title>DuoStatic — Academia Carmesim</title>
   <link rel="icon" href="assets/arle-pensativa.webp" type="image/webp">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/fluxo.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <script src="js/dados.js" defer></script>
   <script src="js/fluxo.js" defer></script>
   <script src="js/app.js" defer></script>
+  <script src="js/offline.js" defer></script>
 </head>
 <body>
  <div class="bg-glow" aria-hidden="true"></div>
@@ -32,7 +37,7 @@
      <header class="topbar">
        <button class="mobile-brand" data-nav="trilha" aria-label="Início">✥ <span>DuoStatic</span></button>
        <span class="topbar-kicker">FATEC · ESTATÍSTICA APLICADA</span>
-       <div class="top-stats"><span title="Experiência acumulada">✦ <b id="header-xp">0</b> XP</span><span title="Acertos seguidos">♨ <b id="header-streak">0</b></span><button title="Configurações" aria-label="Configurações" data-nav="configuracoes">⚙</button></div>
+       <div class="top-stats"><span id="offline-status" class="offline-chip" role="status" title="Preparando modo offline">● Conectado</span><span title="Experiência acumulada">✦ <b id="header-xp">0</b> XP</span><span title="Acertos seguidos">♨ <b id="header-streak">0</b></span><button title="Configurações" aria-label="Configurações" data-nav="configuracoes">⚙</button></div>
      </header>
      <main id="app" tabindex="-1" aria-live="polite"></main>
      <footer class="footer">DuoStatic · Projeto independente de estudo. Conteúdo elaborado a partir dos materiais fornecidos em aula.</footer>
