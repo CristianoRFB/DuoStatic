@@ -67,6 +67,7 @@
    }else if(seed.kind==="z"){
      let v=seed.value,m=seed.mean,sd=seed.sd;
      if(!real){m=between(5,35)*10;sd=rand([5,10,20,25,40]);v=m+sd*rand([-3,-2,-1,1,2,3])}
+     if(!real)q.prompt="Com os números mostrados, como interpretar o Escore Z?";
      const z=(v-m)/sd;
      const label=z>2?"Acima da média e incomum":z< -2?"Abaixo da média e incomum":z===2?"Acima da média, no limite de atenção":z===-2?"Abaixo da média, no limite de atenção":z>0?"Acima da média, sem ultrapassar o limite":z<0?"Abaixo da média, sem ultrapassar o limite":"Exatamente na média";
      const wrong=["Acima da média e incomum","Abaixo da média e incomum","Acima da média, no limite de atenção","Abaixo da média, no limite de atenção","Acima da média, sem ultrapassar o limite","Abaixo da média, sem ultrapassar o limite","Exatamente na média"].filter(x=>x!==label);
@@ -77,6 +78,7 @@
    }else if(seed.kind==="compareZ"){
      let a=[seed.aVal,seed.aMean,seed.aSd],b=[seed.bVal,seed.bMean,seed.bSd];
      if(!real){a=[95,65,10];b=[205,160,25]}
+     if(!real)q.prompt="Qual dos sistemas se destacou mais RELATIVAMENTE à própria média?";
      const za=(a[0]-a[1])/a[2],zb=(b[0]-b[1])/b[2];
      const winner=za>zb?"Sistema A":"Sistema B";
      items=pickOptions(winner,["Sistema A","Sistema B","Empate de posições relativas","Não podemos comparar os escores"].filter(x=>x!==winner));
@@ -87,6 +89,7 @@
    }else if(seed.kind==="mean"){
      let m=seed.mean,sd=seed.sd,n=seed.n,conf=seed.conf;
      if(!real){const factor=rand([.8,1.1,1.2]);m=Number((m*factor).toFixed(seed.digits));n=rand([36,49,64,81,100]);conf=rand([90,95,99])}
+     if(!real)q.prompt="A partir dos dados mostrados, qual é o intervalo de confiança para a MÉDIA?";
      const margin=zCritical(conf)*sd/Math.sqrt(n),d=seed.digits||2;
      const good=bounds(margin,m,d,seed.unit);
      const wrong=[
@@ -102,6 +105,7 @@
    }else if(seed.kind==="prop"){
      let successes=seed.success,n=seed.n,conf=seed.conf;
      if(!real){n=rand([100,200,400,500,800]);const p0=rand([.15,.30,.40,.63,.70,.75]);successes=Math.round(n*p0);conf=rand([90,95,99])}
+     if(!real)q.prompt="Com esses dados, qual o intervalo de confiança para a PROPORÇÃO indicada?";
      const p=successes/n,margin=zCritical(conf)*Math.sqrt(p*(1-p)/n);
      const good=bounds(margin,p,3,"").replace(/([0-9]),/g,"$1,"); // limites em decimal, precisão padronizada
      const fmtRange=(mult)=>pct(Math.max(0,p-margin*mult),1)+"–"+pct(Math.min(1,p+margin*mult),1);
@@ -114,6 +118,7 @@
    }else if(seed.kind==="sampleMean"){
      let sd=seed.sd,err=seed.error,conf=seed.conf;
      if(!real){sd=rand([500,800,1200,1500]);err=rand([50,75,100,125]);conf=rand([90,95,99])}
+     if(!real)q.prompt="Com a precisão e confiança indicadas, quantas MEDIÇÕES são necessárias no mínimo?";
      const n=Math.ceil(((zCritical(conf)*sd)/err)**2-1e-10);
      items=pickOptions(format(n,0)+" medições",[format(Math.max(1,n-1),0)+" medições",format(n+between(8,55),0)+" medições",format(Math.max(1,Math.floor(n/2)),0)+" medições",format(Math.round(n*1.25),0)+" medições"]);
      q.context="Desvio padrão conhecido: "+format(sd,0)+" "+seed.unit+" · erro máximo: "+format(err,0)+" "+seed.unit+" · confiança: "+conf+"%.";
@@ -123,6 +128,7 @@
    }else if(seed.kind==="sampleProp"){
      let p=seed.p,err=seed.error,conf=seed.conf;
      if(!real){p=rand([.15,.20,.30,.40,.50]);err=rand([.02,.03,.04,.05]);conf=rand([90,95,99])}
+     if(!real)q.prompt="Com os dados mostrados, qual o número mínimo de OBSERVAÇÕES para estimar uma proporção?";
      const raw=(zCritical(conf)**2*p*(1-p))/err**2,n=Math.ceil(raw-1e-10);
      items=pickOptions(format(n,0)+" observações",[format(n-1,0)+" observações",format(Math.floor(n/2),0)+" observações",format(n+between(10,80),0)+" observações",format(Math.round(n*1.1),0)+" observações"]);
      q.context="Proporção anterior: "+pct(p,0)+" · erro máximo: "+pct(err,0)+" · confiança: "+conf+"%.";
@@ -136,6 +142,7 @@
        pairs=pairs.map(([x,y],i)=>[x,Math.max(.01,Math.round((Math.abs(mult)*y)+(i%3)*Math.abs(mult)*2))]);
        if(mult<0){const maxY=Math.max(...pairs.map(p=>p[1]));pairs=pairs.map(([x,y])=>[x,maxY-y+10])}
      }
+     if(!real)q.prompt="Na variação de treino destes dados, qual a direção e força da correlação?";
      const {r}=stats(pairs),power=Math.abs(r)>=.7?"forte":Math.abs(r)>=.3?"moderada":"fraca";
      const direction=r>.02?"positiva":r<-.02?"negativa":"próxima de zero";
      const label=power+" e "+direction;
@@ -148,6 +155,7 @@
    }else if(seed.kind==="regression"){
      let pairs=listPairs(seed.dataset),target=seed.predict;
      if(!real){const multiplier=rand([.65,.8,1.2,1.4]);pairs=pairs.map(([x,y])=>[x,Math.round(y*multiplier)]);target=Math.round(target*rand([.9,1,1.1]))}
+     if(!real)q.prompt="Para X = "+format(target,0)+", qual valor de Y a reta ajustada prevê?";
      const {a,b}=stats(pairs),pred=a*target+b,d=seed.dataset==="bugs"?1:0;
      items=pickOptions(format(pred,d),[format(pred+(d?2:60),d),format(pred-(d?2:60),d),format(pred+(d?4:100),d),format(pred-(d?4:100),d)]);
      q.context=pairs.length+" pares observados. Use X = "+format(target,0)+". Primeiros dados: "+pairs.slice(0,3).map(([x,y])=>"("+x+"; "+y+")").join(", ")+"…";
@@ -241,7 +249,7 @@
    if(headerStreak)headerStreak.textContent=state.streak;
  }
  function go(view){if(!["trilha","infinito","biblioteca","configuracoes"].includes(view))view="trilha";state.view=view;save();render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"})}
- function lessonCount(stage){return stage===0?3:stage===1?4:5}
+ function lessonCount(stage){const t=state.session?.topic;const pool=DATA.questions.filter(q=>q.t===t&&q.level<=stage).length;return Math.max(1,Math.min(stage===0?3:stage===1?4:5,pool))}
  function prepareLesson(tid,stage){
    if(!DATA.topics.some(t=>t.id===tid))return;
    const unlocked=state.progress[tid]||0;
