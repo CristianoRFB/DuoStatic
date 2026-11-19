@@ -1,0 +1,21 @@
+name: Testar DuoStatic
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Conferir sintaxe
+        run: |
+          node --check js/dados.js
+          node --check js/app.js
+      - name: Executar testes
+        run: node --test tests/smoke.test.js
