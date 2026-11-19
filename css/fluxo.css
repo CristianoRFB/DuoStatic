@@ -46,3 +46,18 @@
  .calc-detail,.calc-chart{padding:15px}
 }
 @media(prefers-reduced-motion:reduce){.calc-node{transition:none}}
+
+/* Estado da conexão e instalação no celular/computador */
+.offline-chip{white-space:nowrap;font-size:.7rem!important;letter-spacing:.02em;color:#e5baaf!important;border-color:#6c4653!important}
+.offline-chip.offline-ok{color:#9af1bc!important;border-color:#4d8b66!important}
+.offline-chip.offline-now{color:#ffcf97!important;border-color:#b38553!important}
+.offline-settings{grid-column:1/-1;background:linear-gradient(135deg,#402537,#241d25)}
+.offline-settings-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.offline-settings #offline-detail{margin:15px 0 8px;color:#d4efdc}
+.offline-settings .btn:disabled{opacity:.65}
+@media(max-width:750px){
+ .top-stats .offline-chip{font-size:0!important;min-width:24px;padding:5px 7px!important}
+ .top-stats .offline-chip:before{content:'●';font-size:13px;color:#e5baaf}
+ .top-stats .offline-chip.offline-ok:before{color:#9af1bc}
+ .top-stats .offline-chip.offline-now:before{color:#ffcf97}
+}
