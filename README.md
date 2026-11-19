@@ -6,15 +6,28 @@ Minijogo responsivo para aprender **a interpretar enunciados** de Estatística A
 
 ## Conteúdo
 
-São seis territórios e quatro casas em cada um (24 etapas):
-1. Correlação de Pearson — se duas variáveis caminham juntas, direção, força, limites e dispersão.
-2. Regressão linear simples — identificar X/Y, reta e previsão.
-3. Intervalo de confiança da média — média, desvio padrão, n, margem e limites.
-4. Intervalo de confiança da proporção — eventos, sucessos, taxas, margem e limites.
-5. Tamanho da amostra — número mínimo de medições ou pessoas, arredondando para cima.
-6. Escore Z — valor observado, média, desvio e posições relativas.
+São seis territórios e quatro casas em cada (24 etapas), em ordem de **prioridade dos materiais mais recentes**:
+1. Tamanho da amostra — 10 de novembro.
+2. Intervalo de confiança da proporção — 27 de outubro.
+3. Intervalo de confiança da média — 27 de outubro.
+4. Correlação de Pearson — 25 de agosto.
+5. Regressão linear simples — 25 de agosto.
+6. Escore Z — 11 de agosto.
+
+Acompanhamento visual: cada tema tem **fluxograma interativo com nós conectados**, cálculo por etapas, valores do exemplo real ou aleatório e ilustrações SVG. É possível tocar em qualquer etapa para ver como o número foi obtido. 
 
 A sequência de uma etapa é **conceito → exemplo → fluxograma → perguntas → feedback explicativo**. O treino infinito aceita todos os territórios ou até dois escolhidos, sem fim automático.
+
+## Instalar e usar offline
+
+1. Abra **https://duostatic-carmesim.pages.dev** com internet, uma vez.
+2. Aguarde o aviso **Offline pronto** na barra superior. Ele indica que o Service Worker guardou o aplicativo, as lições, os gráficos SVG, as cinco imagens e os scripts.
+3. Depois, abra novamente o endereço mesmo sem internet. O site poderá carregar pelo cache.
+4. Opcionalmente, acesse **Configurações → Estudar sem internet → Instalar aplicativo**. No Chrome, se o botão nativo não aparecer, use o menu ⋮ → Instalar aplicativo/Adicionar à tela inicial. No Safari do iOS, Compartilhar → Adicionar à Tela de Início.
+
+**A instalação é opcional:** o modo offline também pode funcionar dentro do navegador. O progresso continua salvo no `localStorage` local. Não há sincronização entre aparelhos: limpar dados do navegador ou desinstalar o aplicativo pode apagar as respostas. A leitura em voz alta depende das vozes disponíveis no dispositivo.
+
+Arquivos do modo offline: `manifest.webmanifest`, `sw.js`, `js/offline.js` e `assets/app-icon.svg`. O Service Worker usa a estratégia **rede primeiro e cache na ausência de conexão**, com pré-armazenamento de todos os arquivos essenciais. Em ambiente local, o Service Worker funciona em `http://localhost` ou HTTPS, não em `file://`. Para atualizar a lista de recursos armazenados, altere `CACHE_VERSION` em `sw.js`.
 
 ## Dados de aula
 
@@ -46,12 +59,18 @@ DuoStatic/
 │   ├── arle-sentada.webp    # Aulas / menu do treino infinito
 │   ├── arle-irritada.webp   # Respostas incorretas
 │   ├── arle-pensativa.webp  # Dicas / interpretação
+│   ├── app-icon.svg       # Ícone PWA
 │   └── mascote.svg         # Mascote anterior (legado, não utilizado)
 ├── css/
-│   └── style.css         # Cores, animações e responsividade
+│   ├── style.css         # Cores, animações e responsividade
+│   └── fluxo.css         # Fluxos de cálculo SVG e modo offline
 ├── js/
 │   ├── dados.js          # Conceitos, pistas, casos e exercícios
-│   └── app.js            # Cálculos, telas, trilha, treino e progresso
+│   ├── app.js            # Cálculos, telas, trilha, treino e progresso
+│   ├── fluxo.js          # Fluxos SVG dinâmicos
+│   └── offline.js        # Instalação e indicação do cache offline
+├── sw.js                 # Service Worker e cache
+├── manifest.webmanifest  # Metadados do app instalável
 └── tests/
     └── smoke.test.js     # Testes automatizados sem dependências
 ```
