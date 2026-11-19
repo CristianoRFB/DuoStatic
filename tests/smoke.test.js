@@ -152,3 +152,34 @@ test("biblioteca e lições exibem visualização conectada com cálculos",()=>{
   debug.go("biblioteca");
   assert.match(app.innerHTML,/calc-sequence/);
 });
+
+
+test("após instalar, abre a trilha sem internet pelo cache do service worker",async()=>{
+  const listeners={};
+  const saved=new Map();
+  const base="https://duostatic-carmesim.pages.dev/";
+  const cache={
+    addAll:async entries=>{for(const item of entries)saved.set(new URL(item,base).href,new Response("guardado: "+item,{status:200}));},
+    match:async req=>saved.get(typeof req==="string"?new URL(req,base).href:req.url),
+    put:async(req,response)=>saved.set(req.url,response)
+  };
+  const sandbox={
+    URL,Response,
+    caches:{open:async()=>cache,keys:async()=>[],delete:async()=>true},
+    fetch:async()=>{throw Error("sem internet")},
+    self:{location:{origin:new URL(base).origin},skipWaiting:async()=>{},clients:{claim:async()=>{}},addEventListener:(name,cb)=>{listeners[name]=cb}}
+  };
+  vm.runInNewContext(read("sw.js"),sandbox,{filename:"sw.js"});
+  let installPromise;
+  listeners.install({waitUntil:p=>{installPromise=p}});
+  await installPromise;
+  assert.ok(saved.has(base));
+  let navigation;
+  listeners.fetch({
+    request:{method:"GET",url:base,mode:"navigate"},
+    respondWith:p=>{navigation=p}
+  });
+  const result=await navigation;
+  assert.equal(result.status,200);
+  assert.match(await result.text(),/guardado/);
+});
