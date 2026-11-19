@@ -1,6 +1,6 @@
 # DuoStatic — Academia Carmesim
 
-Minijogo responsivo para aprender **a interpretar enunciados** de Estatística Aplicada, com trilha de lições, desenhos, perguntas interativas, treino infinito e mascote chibi vetorial inspirado na Arlecchino.
+Minijogo responsivo para aprender **a interpretar enunciados** de Estatística Aplicada, com trilha de lições, desenhos, perguntas interativas, treino infinito e cinco chibis da Arlecchino enviadas pelo usuário e cuidadosamente recortadas.
 
 **Site:** https://duostatic-carmesim.pages.dev
 
@@ -41,7 +41,12 @@ Resultados numéricos são calculados pelo próprio JavaScript com os valores cr
 DuoStatic/
 ├── index.html            # Estrutura sem frameworks
 ├── assets/
-│   └── mascote.svg       # Chibi vetorial autoral
+│   ├── arle-calma.webp      # Recepção / boas-vindas
+│   ├── arle-vitoria.webp    # Respostas corretas / conclusão
+│   ├── arle-sentada.webp    # Aulas / menu do treino infinito
+│   ├── arle-irritada.webp   # Respostas incorretas
+│   ├── arle-pensativa.webp  # Dicas / interpretação
+│   └── mascote.svg         # Mascote anterior (legado, não utilizado)
 ├── css/
 │   └── style.css         # Cores, animações e responsividade
 ├── js/
@@ -84,4 +89,4 @@ Repositório `CristianoRFB/DuoStatic`, branch `main`. Cloudflare Pages está con
 - Anote a fonte no campo `src`, a pista no campo `cue` e mantenha `why` para explicar o motivo da resposta.
 - Execute os testes antes de publicar.
 
-O mascote é uma **ilustração original inspirada na personagem**, sem imagens oficiais ou materiais de terceiros anexados.
+As cinco ilustrações são **imagens fornecidas pelo usuário**. O tratamento do projeto removeu o fundo e preservou a arte original. As imagens permanecem sujeitas aos direitos de seus respectivos autores.
