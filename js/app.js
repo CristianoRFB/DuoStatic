@@ -218,7 +218,7 @@
    const s=state.session,q=s.question,t=topic(q.t);
    const target=s.kind==="lesson"?lessonCount(s.stage):null;
    return '<div class="view"><button class="back" data-nav="'+(s.kind==="lesson"?"trilha":"infinito")+'">‹ Sair do desafio</button><div class="module-counter"><span class="pill">'+(s.kind==="infinite"?"∞ TREINO INFINITO":t.number+" · "+esc(t.title))+'</span><div class="bar-track" aria-label="Progresso"><div class="bar-fill" style="width:"'+(target?100*s.count/target:Math.min(100,s.count%10*10))+'%"></div></div><span class="question-tick">'+(s.count+(s.chosen===null?1:0))+(target?"/"+target:" · ∞")+'</span></div>'+
-   '<div class="quiz-layout"><section class="question-card"><div class="question-head"><h2>'+esc(q.label||t.title)+'</h2><span class="pill">✦ +15 XP</span></div><div class="question-context">'+esc(q.context||"Leia atentamente a situação e reconheça o conceito central antes de calcular.")+'</div><p class="question-prompt">'+esc(q.prompt)+'</p><div class="choices" role="group" aria-label="Alternativas">'+q.opts.map((o,i)=>'<button class="choice '+(s.chosen!==null?(i===q.right?"correct":i===s.chosen?"incorrect":"dim"):"")+'" data-answer="'+i+'" '+(s.chosen!==null?"disabled":"")+'><span class="key">'+(i+1)+'</span>'+esc(o)+'</button>').join("")+'</div>'+
+   '<div class="quiz-layout"><section class="question-card"><div class="question-head"><h2>'+esc(q.label||t.title)+'</h2><span class="pill">✦ +15 XP</span></div><div class="question-context">'+esc(q.context||"Leia atentamente a situação e reconheça o conceito central antes de calcular.")+'</div><p class="question-prompt">'+esc(q.prompt)+'</p><button class="btn btn-quiet" data-action="speak" style="margin:0 0 15px;padding:9px 14px;min-height:40px">♫ Ouvir enunciado</button><div class="choices" role="group" aria-label="Alternativas">'+q.opts.map((o,i)=>'<button class="choice '+(s.chosen!==null?(i===q.right?"correct":i===s.chosen?"incorrect":"dim"):"")+'" data-answer="'+i+'" '+(s.chosen!==null?"disabled":"")+'><span class="key">'+(i+1)+'</span>'+esc(o)+'</button>').join("")+'</div>'+
    (s.chosen===null?'<details style="margin-top:17px;color:var(--soft)"><summary style="cursor:pointer">Precisa de uma pista para interpretar?</summary><p style="padding:10px 0 0;color:var(--gold)">'+esc(q.cue||t.cue)+'</p></details>':'<div class="feedback '+(s.chosen===q.right?"":"bad")+' pop" role="status"><strong>'+(s.chosen===q.right?"✦ Muito bem! Você identificou o caminho.":"A interpretação correta é: "+esc(q.opts[q.right]))+'</strong><p>'+esc(q.why)+'</p><strong style="font-size:1rem;color:var(--gold)">Fluxograma deste exercício</strong>'+flow(q.path)+'<small>Fonte: '+esc(q.src||"Conteúdo da aula")+'</small></div>')+
    '<div class="quick-actions">'+(s.chosen!==null?'<button class="btn btn-primary" data-action="next">'+(s.kind==="infinite"?"Próxima questão ∞":"Continuar a trilha ›")+'</button>':'<span class="tiny muted">Use as teclas 1–4 para responder.</span>')+'</div></section>'+
    '<aside class="quiz-aside"><div><h3>Observe a pista</h3><p>'+esc(s.chosen===null?"Olhe o gráfico e faça uma pergunta: estou comparando, prevendo, estimando uma faixa ou procurando um valor incomum?":q.cue||t.cue)+'</p><div class="divider"></div><span class="tag-source">'+esc(q.src||"Aula de Estatística")+'</span></div><div class="diagram">'+draw(q.diagram,q)+'</div></aside></div></div>';
@@ -326,6 +326,16 @@
      case"next":nextQuestion();break;
      case"repeat":prepareLesson(state.session.topic,state.session.stage);break;
      case"after-finish":completeNext();break;
+     case"speak":{
+       const q=state.session?.question;
+       if(q&&window.speechSynthesis&&window.SpeechSynthesisUtterance){
+         window.speechSynthesis.cancel();
+         const utterance=new window.SpeechSynthesisUtterance((q.context||"")+" "+q.prompt);
+         utterance.lang="pt-BR";utterance.rate=.93;
+         window.speechSynthesis.speak(utterance);
+       }
+       break;
+     }
      case"start-infinite":startInfinite();break;
      case"toggle-topic":updateTopic(el.dataset.topic);break;
      case"all":state.selectedTopics=[];save();render();break;
