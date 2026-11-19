@@ -43,3 +43,6 @@
 @media(max-width:405px){.hero-img{height:150px}.feedback{align-items:flex-start;gap:9px}.feedback-mascot{width:88px;height:95px;max-width:28%}.feedback .flowchart{gap:4px}.aside-mascot{max-height:95px}}
 @media(prefers-reduced-motion:reduce){.hero-img,.intro-mascot,.aside-mascot,.feedback-mascot,.finished-mascot{animation:none!important}}
 .reduce-motion .hero-img,.reduce-motion .intro-mascot,.reduce-motion .aside-mascot,.reduce-motion .feedback-mascot,.reduce-motion .finished-mascot{animation:none!important}
+
+/* Explicação direta: leitura confortável logo abaixo do conceito formal. */
+.plain-explainer{font-size:1.06rem;line-height:1.7;color:#f3ddd5;max-width:74ch}
