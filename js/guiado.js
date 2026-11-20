@@ -239,10 +239,30 @@
        ["Qualquer gráfico prova causalidade.","O enunciado não contém dados suficientes para interpretar nada.","Uma porcentagem é a mesma coisa que uma regressão."],
        item.explanation,["result"]));
    }
-   s.push(step("O que você deve lembrar para a prova?",
-     "Ler o pedido e escolher o procedimento antes de fazer a conta.",
-     ["Escolher sempre a primeira fórmula da lista.","Ignorar a unidade da variável.","Aceitar previsões fora da amostra sem ressalvas."],
-     "O verbo do enunciado determina a ferramenta. Depois vêm os dados.",["meaning"]));
+   const conclusions={
+     frequency:"A frequência percentual mostra a parte do total; a acumulada soma os valores anteriores em ordem.",
+     statMean:"A média representa o tempo médio nesta amostra, não o tempo de todos os usuários.",
+     statMode:"A moda é o tempo mais frequente, não a média.",
+     statMedian:"A mediana separa os 30 registros ordenados em duas metades.",
+     statVariance:"Quanto maior a variância, maior o espalhamento quadrático dos tempos.",
+     statStd:"O desvio padrão indica a dispersão típica das horas na mesma unidade.",
+     quartile:"A caixa mostra a metade central dos dados entre Q1 e Q3.",
+     outlier:"Um possível outlier merece investigação, mas não prova que seja erro.",
+     outlierZ:"Um z de quase 3 aponta um valor muito acima da média.",
+     scatter:"Cada ponto liga idade e horas do mesmo usuário; não garante causa e efeito.",
+     pearson:"Idade e horas têm associação positiva forte nesta amostra, sem provar causalidade.",
+     regression:"A reta serve para estimar horas a partir da idade na faixa observada.",
+     prediction:"O número calculado para 50 anos é extrapolação, pois a maior idade observada é 40.",
+     extrapolation:"Não é confiável concluir para 70 anos a partir da amostra de 12 a 40.",
+     reverseRegression:"Para prever idade a partir de horas, ajusta-se outra regressão com a resposta invertida.",
+     classification:"O tipo da variável orienta qual cálculo e qual gráfico fazem sentido.",
+     chart:"O gráfico precisa corresponder ao tipo de dado que se quer mostrar."
+   };
+   const conclusion=conclusions[mode]||"Primeiro entenda a pergunta; só depois escolha a conta.";
+   s.push(step("O que significa o resultado?",
+     conclusion,
+     ["A correlação sempre prova causa e efeito.","Qualquer fórmula serve, desde que tenha números.","Toda previsão pode ser estendida indefinidamente fora da amostra."],
+     item.explanation,["meaning"]));
    let visual="none",calc={};
    if(["pearson","scatter","regression","prediction","extrapolation","reverseRegression"].includes(mode)){
      visual=["pearson","scatter"].includes(mode)?"correlacao":"regressao";
