@@ -156,19 +156,47 @@
    }
    return '<svg class="calc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 220" role="img" aria-label="Gráfico estatístico interativo da etapa '+(selected+1)+'">'+body+'</svg>';
  }
+ function friendlyLabel(x){
+   const names={
+     "Proporção p":"Porcentagem observada","Confiança z":"Número da tabela de confiança",
+     "Valor z":"Número da tabela de confiança","Erro máximo E":"Erro máximo tolerado",
+     "Margem E":"Margem de erro","Calcular n":"Calcular quantas observações",
+     "Amostra n":"Quantidade observada","Casos x":"Casos de interesse",
+     "Intervalo IC":"Faixa estimada","Desvio σ":"Desvio padrão",
+     "Escore Z":"Distância da média","Coeficiente r":"Força da relação",
+     "Variável X":"Primeira característica","Variável Y":"Segunda característica",
+     "Pares (X,Y)":"Pares de dados","Inclinação a":"Quanto a reta sobe ou desce",
+     "Intercepto b":"Ponto inicial da reta","X conhecido":"Dado conhecido",
+     "Y desejado":"Dado que queremos prever","Substituir X":"Usar o dado conhecido",
+     "Y previsto":"Valor previsto"
+   };
+   return names[x]||String(x).replace(/\bIC\b/g,"intervalo");
+ }
+ function friendlyDetail(x){
+   return String(x)
+     .replace(/p = 50%/g,"a porcentagem esperada é 50%")
+     .replace(/valor z crítico|z crítico|valor crítico z/g,"número de referência da tabela de confiança")
+     .replace(/\bIC\b/g,"intervalo de confiança")
+     .replace(/n = /g,"quantidade de observações: ")
+     .replace(/\|r\|/g,"a distância do coeficiente até zero")
+     .replace(/\bz × desvio\b/g,"número da tabela multiplicado pelo desvio")
+     .replace(/X = 0/g,"a primeira característica vale zero")
+     .replace(/\bX\b/g,"a primeira característica")
+     .replace(/\bY\b/g,"a segunda característica");
+ }
  function render(topicId,q,currentStep=0){
    const built=stepsFor(topicId,q),steps=built.steps;
    if(!steps.length)return "";
    const selected=Math.max(0,Math.min(currentStep,steps.length-1)),current=steps[selected];
    const headers=steps.map((s,i)=>{
      const status=i===selected?"is-current":i<selected?"is-done":"is-ahead";
-     return '<button class="calc-node '+status+'" type="button" data-action="calc-step" data-step="'+i+'" aria-pressed="'+(i===selected)+'" aria-label="Etapa '+(i+1)+": "+esc(s.label)+'"><span class="calc-node-label">'+esc(s.label)+'</span><span class="calc-node-value">'+(i<=selected?esc(s.value):"—")+'</span></button>';
+     return '<button class="calc-node '+status+'" type="button" data-action="calc-step" data-step="'+i+'" aria-pressed="'+(i===selected)+'" aria-label="Etapa '+(i+1)+": "+esc(friendlyLabel(s.label))+'"><span class="calc-node-label">'+esc(friendlyLabel(s.label))+'</span><span class="calc-node-value">'+(i<=selected?esc(s.value):"—")+'</span></button>';
    }).join('<span class="calc-connector" aria-hidden="true"><i></i></span>');
    return '<section class="calculation-lab" aria-label="Fluxo do cálculo"><div class="calc-top"><div><p class="eyebrow">ACOMPANHAMENTO</p><h3>Fluxo do cálculo</h3></div><span class="calc-status">Etapa '+(selected+1)+' de '+steps.length+'</span></div>'+
      '<div class="calc-scroll" tabindex="0" aria-label="Etapas do cálculo, deslize para os lados"><div class="calc-sequence">'+headers+'</div></div>'+
      '<p class="calc-hint">Toque em qualquer bloco para entender aquela parte. O verde mostra a etapa atual.</p>'+
-     '<div class="calc-content"><div class="calc-detail"><span class="calc-step-tag">'+(selected+1)+' / '+steps.length+'</span><h4>'+esc(current.label)+'</h4><strong class="calc-highlight">'+esc(current.value)+'</strong><p>'+esc(current.detail)+'</p>'+
-     (current.math?'<div class="calc-math">'+esc(current.math)+'</div>':"")+
+     '<div class="calc-content"><div class="calc-detail"><span class="calc-step-tag">'+(selected+1)+' / '+steps.length+'</span><h4>'+esc(friendlyLabel(current.label))+'</h4><strong class="calc-highlight">'+esc(current.value)+'</strong><p>'+esc(friendlyDetail(current.detail))+'</p>'+
+     ""+
      '<div class="calc-actions"><button type="button" class="btn btn-quiet" data-action="calc-step" data-step="'+Math.max(0,selected-1)+'" '+(selected===0?"disabled":"")+'>‹ Voltar</button><button type="button" class="btn btn-primary" data-action="calc-step" data-step="'+Math.min(steps.length-1,selected+1)+'" '+(selected===steps.length-1?"disabled":"")+'>Próxima etapa ›</button></div></div>'+
      '<div class="calc-chart">'+sceneSvg(built.kind,built.data,selected,steps.length)+'</div></div></section>';
  }
