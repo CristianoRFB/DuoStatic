@@ -1,6 +1,6 @@
 /* DuoStatic — estudo offline. Mude a versão ao atualizar a lista de arquivos. */
 const CACHE_PREFIX="duostatic-app-";
-const CACHE_VERSION="duostatic-app-v2026-11-20-3";
+const CACHE_VERSION="duostatic-app-v2026-11-20-4";
 const OFFLINE_ASSETS=[
  "./",
  "./index.html",
@@ -10,6 +10,8 @@ const OFFLINE_ASSETS=[
  "./js/dados.js",
  "./js/excel.js",
  "./js/guiado.js",
+ "./js/conceitos.js",
+ "./css/conceitos.css",
  "./css/guiado.css",
  "./js/fluxo.js",
  "./js/app.js",
