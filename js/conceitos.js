@@ -154,14 +154,59 @@
      const p=item.p,rest=1-p;
      step.why="O histórico descreve "+percent(p)+" com a característica pesquisada e "+percent(rest)+" sem ela. É uma referência de estudos anteriores, NÃO significa que só "+percent(p)+" da população foi entrevistada.";
    }
+   if(type==="prop" && /Qual é a proporção p = x ÷ n/.test(q)){
+     const ratio=item.rate!==undefined?item.rate:item.success/item.n;
+     step.question="Qual porcentagem das observações pertence ao grupo pedido?";
+     step.why="Dividimos a quantidade de casos favoráveis pelo número total de observações. Nesta amostra, a porcentagem encontrada é "+percent(ratio,1)+".";
+   }
+   if(type==="prop" && /Qual porcentagem observada vira a proporção p/.test(q)){
+     step.question="Qual porcentagem já foi observada no grupo estudado?";
+     step.why="A porcentagem informada pelo enunciado já é a parte do total. Ela será usada na conta junto com a parte restante.";
+   }
+   if(type==="prop" && /tamanho da amostra n/.test(q)){
+     step.question="Quantas pessoas ou itens foram observados ao todo?";
+     step.why="O total observado é "+number(item.n,0)+". Não confunda com quantos apresentaram a característica estudada.";
+   }
+   if(type==="prop" && /grupo que interessa \(x\)/.test(q)){
+     step.question="Quantos casos têm a característica que a questão quer analisar?";
+   }
+   if(type==="mean" && /Quanto vale a margem de erro E/.test(q)){
+     step.question="Qual distância devemos colocar para cada lado da média?";
+     const z={90:1.645,95:1.96,99:2.575}[item.conf]||1.96;
+     step.why="Divida o desvio padrão de "+number(item.sd,2)+" pela raiz quadrada de "+number(item.n,0)+" observações. Depois multiplique pelo valor "+number(z,3)+" da tabela da confiança. O resultado é a margem.";
+   }
+   if(type==="prop" && /Qual é a margem E/.test(q)){
+     const p=item.rate!==undefined?item.rate:item.success/item.n;
+     step.question="Quantos pontos percentuais correspondem à margem de erro?";
+     step.why="Use "+percent(p,1)+" da amostra e os outros "+percent(1-p,1)+". Multiplique as duas partes em decimais, divida pelo total, tire a raiz quadrada e multiplique pelo número de referência da confiança. Converta o resultado em pontos percentuais.";
+   }
+   if(type==="prop" && /erro padrão da proporção/.test(q)){
+     step.question="Quanta variação costuma ocorrer na porcentagem de uma amostra desse tamanho?";
+     step.why="Use a parte observada e a parte restante, multiplique as duas, divida pelo número total de observações e tire a raiz quadrada. Este valor ainda não é a margem final do intervalo.";
+   }
+   if(type==="prop" && /Qual intervalo representa/.test(q)){
+     step.why="Pegue a porcentagem observada, subtraia a margem para obter o limite inferior e some a margem para o limite superior.";
+   }
+   if(type==="mean" && /Qual é o intervalo calculado/.test(q)){
+     step.why="Pegue a média observada, subtraia a margem para encontrar o limite inferior e some a margem para encontrar o superior.";
+   }
+   if(type==="z" && /Qual é o escore Z/.test(q)){
+     step.question="Quantos desvios-padrão separam a medição atual da média?";
+     step.why="Subtraia a média do valor observado e divida a diferença pelo desvio padrão. Assim descobrimos quantas vezes o desvio cabe nessa distância.";
+   }
+   if(type==="dataset" && /idade = a×horas\+b/i.test(step.why)){
+     step.why=step.why.replace(/idade = a×horas\+b/gi,"uma reta que estima a idade a partir das horas");
+   }
    // Outros rótulos abreviados são trocados por nomes, sem mexer no cálculo.
    const clean=(str)=>String(str)
      .replace(/\bIC\b/g,"intervalo de confiança")
+     .replace(/\bescala z\b/gi,"escala de desvios-padrão")
      .replace(/\bp\s*=\s*x\s*÷\s*n\b/gi,"quantidade de casos dividida pelo total")
      .replace(/\bz\s*=\s*\(/gi,"diferença entre o valor e a média, dividida pelo desvio (")
      .replace(/\bE\s*=\s*/g,"margem de erro: ")
-     .replace(/\bE\b/g,"margem de erro")
+     .replace(/margem de erro E\b/g,"margem de erro")
      .replace(/\bz crítico\b/gi,"valor de referência da confiança")
+     .replace(/número crítico z\b/gi,"número de referência da tabela de confiança")
      .replace(/\bproporção p\b/gi,"proporção observada")
      .replace(/\bn\b(?=[ ?.:,])/g,"quantidade observada")
      .replace(/\bp\b(?=[ ?.:,])/g,"proporção")
