@@ -385,19 +385,55 @@
      visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
  }
  function buildZ(item){
-   const z=(item.value-item.mean)/item.sd;
+   const z=(item.value-item.mean)/item.sd,unit=item.unit||"unidades";
+   const difference=item.value-item.mean;
+   const high=z>0,low=z<0;
+   const significance=Math.abs(z)>2?"é mais distante do que o limite de 2 desvios usado na aula e merece atenção":
+     Math.abs(z)===2?"está no limite de atenção de 2 desvios usado na aula":"não ultrapassa o limite de atenção de 2 desvios usado na aula";
    const s=[
-     step("O que queremos medir?","A distância do valor individual até a média em desvios padrão",
-       ["Um intervalo de porcentagens","A previsão pela reta","Uma tabela de frequências"],"O escore Z padroniza a posição de um caso.",[]),
-     numStep("Qual é o valor observado?",item.value,item.unit,"É o dado individual a ser avaliado.",["value"]),
-     numStep("Qual média serve de referência?",item.mean,item.unit,"Você compara o valor com esta média.",["mean"]),
-     numStep("Qual é o desvio padrão?",item.sd,item.unit,"Divida a diferença entre o valor e a média por ele.",["sd"]),
-     numStep("Qual é o escore Z?",z,"","z = (valor−média) ÷ desvio = "+fmt(z,2)+".",["result"]),
-     step("Como interpretar o sinal?",z>0?"O valor está acima da média":z<0?"O valor está abaixo da média":"O valor coincide com a média",
-       ["Um z negativo sempre é ruim","O escore Z é a média em %","Não é possível saber a direção"],
-       "O sinal mostra acima/abaixo; a intensidade |z| mede quão distante está.",["meaning"])
+     step("A equipe tem um valor recente. O que ela quer saber?",
+       "Se essa medição ficou muito acima ou abaixo do habitual",
+       ["O resultado exato da próxima medição","O preço médio de uma pesquisa","O número de pessoas a entrevistar"],
+       "O problema é comparar UMA medição com o histórico, e não fazer uma nova pesquisa.",
+       [],"Pense: algo mudou em relação ao comportamento normal da rede, servidor ou programa?"),
+     step("Para descobrir se o resultado é normal, qual comparação ajuda?",
+       "Comparar com a média das medições antigas",
+       ["Comparar somente com o maior número da tabela","Comparar com o preço do equipamento","Comparar com a quantidade de funcionários"],
+       "A média histórica é nosso ponto de referência para saber se o valor está acima ou abaixo do habitual.",
+       [],"A média resume o valor típico das medições anteriores."),
+     numStep("Qual foi o valor observado AGORA?",item.value,unit,
+       "É a medição atual que queremos analisar.",["value"],Number.isInteger(item.value)?0:1),
+     numStep("Qual era a média histórica?",item.mean,unit,
+       "Esse é o valor usado como referência para o comportamento habitual.",["mean"],Number.isInteger(item.mean)?0:1),
+     step("E o desvio padrão de "+fmt(item.sd,Number.isInteger(item.sd)?0:1)+" "+unit+" indica o quê?",
+       "Quanto os resultados costumam variar em torno da média",
+       ["Que cada medição será igual à média","A quantidade de falhas permitidas no sistema","A duração da próxima medição com certeza"],
+       "O desvio padrão informa o tamanho de uma variação comum no grupo. Não é a média.",["sd"],
+       "Se o desvio é 40 ms, dizemos que 40 ms representa uma unidade de variação usada na comparação."),
+     numStep("Primeiro, qual é a diferença entre o valor atual e a média?",difference,unit,
+       "Diferença = "+fmt(item.value,2)+" − "+fmt(item.mean,2)+" = "+fmt(difference,2)+" "+unit+".",
+       [],Number.isInteger(difference)?0:1),
+     step("Para entender essa diferença, o que fazemos agora?",
+       "Dividimos a diferença pelo desvio padrão",
+       ["Somamos o desvio ao valor atual","Dividimos a média por 100","Multiplicamos o valor atual pela amostra"],
+       "Assim descobrimos quantos desvios-padrão cabem entre o valor atual e a média.",[],
+       "É como medir uma distância usando o desvio como uma régua."),
+     numStep("Quantos desvios-padrão o valor está da média?",z,"",
+       "z = ("+fmt(item.value,2)+" − "+fmt(item.mean,2)+") ÷ "+fmt(item.sd,2)+" = "+fmt(z,2)+".",
+       ["result"],2),
+     step("O que esse número significa?",
+       "O valor está "+(high?"acima":low?"abaixo":"exatamente na")+" média e "+significance,
+       [
+         "O valor calculado representa uma porcentagem de falhas",
+         "O resultado permite prever com certeza o próximo teste",
+         "Um resultado acima da média significa obrigatoriamente que o sistema está quebrado"
+       ],"O sinal indica o lado da média; o valor absoluto de z indica a distância. A interpretação de ser bom ou ruim depende da variável.",
+       ["meaning"],
+       "Um resultado incomum pode ser bom ou ruim: latência mais BAIXA, por exemplo, pode ser ótima.")
    ];
-   return {item,translation:"Ele quer saber quantos desvios padrão um valor está acima ou abaixo da média.",steps:s,result:"z = "+fmt(z,2),meaning:"O sinal indica o lado da média; a distância indica o quanto o valor é incomum.",visual:"escore",calc:{z}};
+   return {item,translation:item.goal||"Queremos comparar a medição recente com o que costuma acontecer, para saber se ela é comum ou incomum.",
+     steps:s,result:"z = "+fmt(z,2),meaning:"O sinal mostra acima ou abaixo da média; o módulo mostra a distância. Aqui o valor "+significance+".",
+     visual:"escore",calc:{z}};
  }
  function build(raw,random=false){
    const item=materialize(raw,random);
