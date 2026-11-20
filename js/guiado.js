@@ -246,7 +246,7 @@
    let visual="none",calc={};
    if(["pearson","scatter","regression","prediction","extrapolation","reverseRegression"].includes(mode)){
      visual=["pearson","scatter"].includes(mode)?"correlacao":"regressao";
-     calc={pairs:d.pairs,r:d.r,a:d.regA,b:d.regB,target:mode==="prediction"?50:70,pred:d.estimate50};
+     calc=mode==="reverseRegression"?{pairs:d.pairs.map(pair=>[pair[1],pair[0]]),r:d.r,a:d.reverseA,b:d.reverseB,target:50,pred:d.ageFor50}:{pairs:d.pairs,r:d.r,a:d.regA,b:d.regB,target:mode==="extrapolation"?70:50,pred:mode==="extrapolation"?d.estimate70:d.estimate50};
    }
    if(mode==="outlier"||mode==="outlierZ"){visual="escore";calc={z:(60-d.h)/d.sd}}
    const descriptions={
