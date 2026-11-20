@@ -1,0 +1,29 @@
+/* DuoStatic — Ajuda progressiva e tabelas consultáveis.
+   Os painéis ficam fechados por padrão, sem ocupar o espaço das respostas. */
+.guide-solve,.guide-values{margin:9px 0;border:1px solid #866074;border-radius:12px;background:#281d29;overflow:hidden}
+.guide-solve>summary,.guide-values>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:12px 14px;color:#f6e2d1;font-size:.93rem}
+.guide-solve>summary::-webkit-details-marker,.guide-values>summary::-webkit-details-marker{display:none}
+.guide-solve>summary::before,.guide-values>summary::before{content:"▸";color:#e891a0;flex:none;transition:transform .18s;font-size:1.1rem}
+.guide-solve[open]>summary::before,.guide-values[open]>summary::before{transform:rotate(90deg)}
+.guide-solve>summary span,.guide-values>summary span{flex:1;font-weight:700}
+.guide-solve>summary small,.guide-values>summary small{font-weight:400;color:#d5b5b7;text-align:right;max-width:144px;line-height:1.4;font-size:.73rem}
+.guide-solve{border-color:#96734a;background:#35282b}
+.guide-solve>summary::before{color:#ffdb91}
+.guide-values{border-color:#705978;background:#28202e}
+.guide-values>summary::before{color:#d2aef3}
+.guide-solve-body,.guide-values-body{padding:13px 15px 15px;border-top:1px solid #745266;color:#eadad1}
+.guide-solve-body ol{margin:0;padding-left:22px;list-style:decimal}
+.guide-solve-body li{line-height:1.52;font-size:.9rem;margin-bottom:11px;padding-left:5px}
+.guide-solve-body li::marker{color:#ffca91;font-weight:700}
+.guide-solve-meaning{margin:12px 0 0;padding:12px 13px;border-radius:9px;background:#3b2a34;line-height:1.48;font-size:.88rem}
+.guide-solve-answer{margin:12px 0 0;border:1px solid #4a9e72;background:#183e2c;color:#dbffe7;border-radius:9px;padding:11px 12px;line-height:1.46;font-size:.9rem;overflow-wrap:anywhere}
+.guide-values-body>p{font-size:.89rem;line-height:1.55;margin:0 0 12px}
+.guide-values-body table{width:100%;border-collapse:collapse;font-size:.88rem}
+.guide-values-body th{text-align:left;color:#e9cabd;border-bottom:1px solid #715767;padding:9px 7px}
+.guide-values-body td{padding:9px 7px;border-bottom:1px solid #4d3846;color:#e9dad5}
+.guide-values-body tr.guide-value-active{background:#174631}
+.guide-values-body tr.guide-value-active td{color:#aaffcf;font-weight:700}
+.guide-values-body .guide-table-note{margin:14px 0 0;padding:10px 12px;border-radius:8px;background:#3d3040}
+.guide-solve summary:focus-visible,.guide-values summary:focus-visible{outline:2px solid #ffca91;outline-offset:-2px}
+@media(max-width:650px){.guide-solve>summary,.guide-values>summary{font-size:.85rem;padding:10px 12px;gap:7px}.guide-solve>summary small,.guide-values>summary small{font-size:.68rem}.guide-solve-body li{font-size:.86rem}.guide-values-body{padding:10px 12px}}
+@media(prefers-reduced-motion:reduce){.guide-solve>summary::before,.guide-values>summary::before{transition:none}}
