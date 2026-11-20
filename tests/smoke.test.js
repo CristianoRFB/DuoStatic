@@ -22,8 +22,10 @@ function makeApp(){
   const localStorage={getItem:key=>store.get(key)||null,setItem:(key,val)=>store.set(key,val)};
   const sandbox={window,document,localStorage,console,Math};
   vm.runInNewContext(read("js/dados.js"),sandbox,{filename:"dados.js"});
+  vm.runInNewContext(read("js/excel.js"),sandbox,{filename:"excel.js"});
+  vm.runInNewContext(read("js/guiado.js"),sandbox,{filename:"guiado.js"});
   vm.runInNewContext(read("js/fluxo.js"),sandbox,{filename:"fluxo.js"});
-  const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,go,answer,prepareLesson,begin,nextQuestion,getState:()=>state,root};render();})();");
+  const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,go,answer,prepareLesson,begin,nextQuestion,startGuided,startGuidedTopic,startInfinite,submitGuided,advanceGuided,getGuided:()=>guidedSession,getState:()=>state,root};render();})();");
   assert.match(source,/window\.__test/,"Não foi possível montar o teste de integração");
   vm.runInNewContext(source,sandbox,{filename:"app.js"});
   return {window,app,storage:store,debug:window.__test,listeners};
@@ -64,14 +66,21 @@ test("modo aleatório mantém número da pergunta coerente com dados alterados",
     if(seed.kind==="z")assert.match(q.prompt,/números mostrados/);
   }
 });
-test("lição ensina, mostra feedback e libera etapa concluída",()=>{
+test("lição guia cada decisão, destaca valores e libera a etapa",()=>{
   const {debug,app}=makeApp();
   debug.prepareLesson("corr",0);
   assert.match(app.innerHTML,/O que é\?/);
   debug.begin();
-  assert.match(app.innerHTML,/question-prompt/);
-  for(let i=0;i<2;i++){debug.answer(0);assert.match(app.innerHTML,/Fluxograma deste exercício/);debug.nextQuestion();}
-  assert.match(app.innerHTML,/ETAPA CONCLUÍDA/);
+  assert.match(app.innerHTML,/Tradução do enunciado/);
+  const session=debug.getGuided();
+  assert.ok(session.model.steps.length>=4);
+  for(let i=0;i<session.model.steps.length;i++){
+    const g=debug.getGuided();
+    debug.submitGuided(g.model.steps[g.index].right);
+    assert.match(app.innerHTML,/Correto\./);
+    debug.advanceGuided();
+  }
+  assert.match(app.innerHTML,/EXERCÍCIO CONCLUÍDO/);
   assert.equal(debug.getState().progress.corr,1);
   assert.ok(debug.getState().xp>0);
 });
@@ -182,4 +191,52 @@ test("após instalar, abre a trilha sem internet pelo cache do service worker",a
   const result=await navigation;
   assert.equal(result.status,200);
   assert.match(await result.text(),/guardado/);
+});
+
+test("todas as partes dos arquivos Excel entram no banco com perguntas guiadas",()=>{
+ const {window}=makeApp();
+ const cases=window.EXCEL_CASES;
+ assert.equal(cases.filter(c=>c.topic==="prop"&&!c.example).length,6);
+ assert.equal(cases.filter(c=>c.topic==="media"&&!c.example).length,9);
+ for(const suffix of ["1a","1b","1c","2a","2b","2c","3a","3b","4a","4b","4c","4d","4e","5a","5b","5c","6a","6b","6c","6d","6e","6f"]){
+   assert.ok(cases.some(c=>c.id==="excel-corr-"+suffix),"Parte ausente "+suffix);
+ }
+ assert.equal(cases.length,41);
+ for(const c of cases){
+   for(const randomized of [false,true]){
+     const m=window.DUO_GUIDED.build(c,randomized);
+     assert.ok(m.steps.length>=4,c.id);
+     assert.ok(m.translation.length>30,c.id);
+     assert.ok(m.result&&m.meaning,c.id);
+     for(const st of m.steps){
+       assert.equal(st.options.length,4,c.id+" "+st.question);
+       assert.equal(new Set(st.options).size,4,c.id+" "+st.question);
+       assert.ok(st.options[st.right],c.id);
+     }
+   }
+ }
+});
+test("erro permite tentar novamente sem mostrar a resposta; acerto destaca número",()=>{
+ const {window,debug,app}=makeApp();
+ debug.startGuided(window.EXCEL_CASES.find(c=>c.id==="excel-prop-1"),"excel");
+ const initial=debug.getGuided();
+ const wrong=(initial.model.steps[0].right+1)%4;
+ debug.submitGuided(wrong);
+ assert.match(app.innerHTML,/Não é essa/);
+ assert.doesNotMatch(app.innerHTML,/guide-correct/);
+ debug.submitGuided(initial.model.steps[0].right);
+ assert.match(app.innerHTML,/Correto\./);
+ debug.advanceGuided();
+ const next=debug.getGuided();
+ debug.submitGuided(next.model.steps[next.index].right);
+ assert.match(app.innerHTML,/guide-reveal/);
+ assert.match(app.innerHTML,/1000/);
+});
+test("amostra e escore Z também possuem resolução guiada",()=>{
+ const {debug,app}=makeApp();
+ for(const id of ["amostra","z"]){
+   debug.prepareLesson(id,0);debug.begin();
+   assert.match(app.innerHTML,/Tradução do enunciado/);
+   assert.ok(debug.getGuided().model.steps.length>=6);
+ }
 });
