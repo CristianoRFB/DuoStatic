@@ -16,7 +16,7 @@ São seis territórios e quatro casas em cada (24 etapas), em ordem de **priorid
 
 Acompanhamento visual: cada tema tem **fluxograma interativo com nós conectados**, cálculo por etapas, valores do exemplo real ou aleatório e ilustrações SVG. É possível tocar em qualquer etapa para ver como o número foi obtido. 
 
-A sequência principal agora é **enunciado → tradução em português claro → identificar os dados → escolher a operação → calcular → interpretar**. Cada resposta correta libera apenas a próxima etapa e destaca números no enunciado; respostas incorretas permitem nova tentativa sem entregar o gabarito. O treino infinito aceita todos os territórios ou até dois escolhidos, sem fim automático.
+O modo guiado começa explicando a **situação concreta e o objetivo**, e só depois pergunta por dados, procedimentos e conclusão. Antes de cada resposta aparece uma dica curta sobre o conceito envolvido; fórmulas surgem apenas quando já se sabe o que a questão quer. Cada resposta correta libera apenas a próxima etapa e destaca números no enunciado; respostas incorretas permitem nova tentativa sem entregar o gabarito. O treino infinito aceita todos os territórios ou até dois escolhidos, sem fim automático.
 
 ## Exercícios Excel realmente incluídos
 
@@ -26,6 +26,9 @@ A sequência principal agora é **enunciado → tradução em português claro �
 - **Tabela Slide.xlsx:** contém apenas uma base de funcionários, sem exercícios escritos. Há dois desafios claramente identificados como **treinos gerados** a partir desses dados.
 
 Total: **41 roteiros** de prática guiada, incluindo exemplos e desafios derivados. O modo Infinito seleciona os roteiros conforme o tema; a aba **Excel** apresenta todos para estudo individual. Na aba Configurações, a opção *Dados aleatórios* recalcula os valores em cenários numéricos, enquanto *Dados reais* mantém os parâmetros originais das planilhas.
+
+
+**Fidelidade das fontes:** textos da aba Excel permanecem identificados como exercícios da planilha, com contexto didático adicional. Alguns materiais PDF apresentam exemplos numéricos sem um enunciado completo; nesses casos, o DuoStatic cria uma **situação didática reconstituída**, usando os números do material. A interface identifica explicitamente essa diferença, sem apresentar a história criada como transcrição literal. O modo aleatório altera valores e recalcula as respostas.
 
 Os cálculos usam os valores críticos normais ensinados nos materiais (z = 1,645/1,96/2,575). A variância e o desvio padrão do conjunto de tempos de acesso usam a fórmula **amostral**; os quartis do BoxPlot usam a convenção **inclusiva**. Algumas conclusões exigem verificar se o valor proposto está dentro do intervalo ou se seria uma extrapolação fora dos dados observados.
 
