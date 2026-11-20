@@ -25,7 +25,7 @@ function makeApp(){
   vm.runInNewContext(read("js/excel.js"),sandbox,{filename:"excel.js"});
   vm.runInNewContext(read("js/guiado.js"),sandbox,{filename:"guiado.js"});
   vm.runInNewContext(read("js/fluxo.js"),sandbox,{filename:"fluxo.js"});
-  const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,go,answer,prepareLesson,begin,nextQuestion,startGuided,startGuidedTopic,startInfinite,submitGuided,advanceGuided,getGuided:()=>guidedSession,getState:()=>state,root};render();})();");
+  const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,makeFallback,go,answer,prepareLesson,begin,nextQuestion,startGuided,startGuidedTopic,startInfinite,submitGuided,advanceGuided,getGuided:()=>guidedSession,getState:()=>state,root};render();})();");
   assert.match(source,/window\.__test/,"Não foi possível montar o teste de integração");
   vm.runInNewContext(source,sandbox,{filename:"app.js"});
   return {window,app,storage:store,debug:window.__test,listeners};
@@ -261,4 +261,47 @@ test("dados completos das duas planilhas podem ser consultados sem ocupar a tela
   assert.match(app.innerHTML,/<details class="guide-source-data">/);
   debug.startGuided(window.EXCEL_CASES.find(c=>c.id==="excel-tabela-1"),"excel");
   assert.match(app.innerHTML,/31 registros/);
+});
+
+test("cenários dos PDFs explicam quem age, por quê e o que quer descobrir",()=>{
+  const {window,debug,app}=makeApp();
+  const state=debug.getState();
+  for(const tid of ["amostra","z"]){
+    for(const mode of ["real","random"]){
+      state.settings.values=mode;
+      for(let n=0;n<50;n++){
+        const item=debug.makeFallback(tid);
+        assert.equal(item.reconstructed,true);
+        assert.ok(item.statement.length>200,item.id);
+        assert.match(item.statement,/equipe|instituto|técnico|serviço online/i);
+        assert.match(item.statement,/média|porcentagem|taxa|acessos|desvios/i);
+        assert.doesNotMatch(item.statement,/Proporção anterior:|Valor observado:|desvio padrão conhecido:/i);
+        const model=window.DUO_GUIDED.build(item,false);
+        assert.ok(model.steps.length>=8,item.id);
+        assert.ok(model.steps[0].guide,item.id);
+        assert.ok(model.translation.length>35,item.id);
+        for(const st of model.steps){
+          assert.equal(st.options.length,4,item.id+": "+st.question);
+          assert.equal(new Set(st.options).size,4,item.id+": "+st.question);
+          assert.ok(st.options[st.right],item.id+": "+st.question);
+        }
+      }
+    }
+  }
+  const item=debug.makeFallback("amostra");
+  debug.startGuided(item,"lesson");
+  assert.match(app.innerHTML,/Situação recriada|Exemplo adaptado/);
+  assert.match(app.innerHTML,/guide-step-context/);
+  assert.doesNotMatch(app.innerHTML,/Dados originais/);
+});
+test("contextualização abrange todos os 41 casos Excel sem apagar o enunciado original",()=>{
+  const {window}=makeApp();
+  const cases=window.EXCEL_CASES;
+  assert.equal(cases.length,41);
+  for(const c of cases){
+    assert.ok(c.context && c.context.length>60,c.id);
+    assert.ok(c.statement && c.statement.length>30,c.id);
+    const model=window.DUO_GUIDED.build(c,false);
+    assert.ok(model.translation.length>50,c.id);
+  }
 });
