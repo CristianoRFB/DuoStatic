@@ -315,6 +315,7 @@
    const opinion=item.title==="Pesquisa de opinião";
    const task=isP?(opinion?"entrevistas":"testes"):"medições de resposta da API";
    const questionQuantity=isP&&!opinion?"Quantos":"Quantas";
+   const neededWord=isP&&!opinion?"necessários":"necessárias";
    const goal=isP?(opinion?"a porcentagem de pessoas que compartilham certa opinião":"a porcentagem de testes que apresentam falhas"):
      "o tempo médio que a API leva para responder";
    const pText=pct(item.p||0,0),eText=isP?pct(item.err,0)+" pontos percentuais":fmt(item.err,0)+" "+(item.unit||"ms");
@@ -375,7 +376,7 @@
      (isP?", p = "+fmt(item.p,2)+" e E = "+fmt(item.err,2):", desvio = "+fmt(item.sd,0)+" e E = "+fmt(item.err,0))+
      ". Depois, calculamos o resultado numérico.",[],
      "A pergunta é QUANTOS coletar: a incógnita da conta é n."));
-   s.push(intStep("Depois de calcular e arredondar para cima, "+questionQuantity.toLowerCase()+" "+task+" serão necessários?",
+   s.push(intStep("Depois de calcular e arredondar para cima, "+questionQuantity.toLowerCase()+" "+task+" serão "+neededWord+"?",
      n,"A conta resulta em "+fmt(raw,2)+". Como não existe fração de "+(opinion?"entrevista":"teste")+
      ", arredondamos para cima: "+fmt(n,0)+".",["result"]," observações"));
    s.push(step("No final, o número "+fmt(n,0)+" serve para quê?",
