@@ -232,7 +232,7 @@
      .replace(/número crítico z\b/gi,"número de referência da tabela de confiança")
      .replace(/\bproporção p\b/gi,"proporção observada")
      .replace(/\bn\b(?=[ ?.:,])/g,"quantidade observada")
-     .replace(/\bp\b(?=[ ?.:,])/g,"proporção")
+     // Letras isoladas são tratadas pelos casos conhecidos acima. Nunca substituir a abreviação "p.p.".
      .replace(/p\s*±\s*margem/gi,"porcentagem observada menos a margem, até porcentagem observada mais a margem")
      .replace(/média\s*±\s*margem/gi,"média menos a margem, até média mais a margem");
    step.question=clean(step.question);
