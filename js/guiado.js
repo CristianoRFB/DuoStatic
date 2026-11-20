@@ -391,13 +391,16 @@
    if(!cur)return "";
    const total=model.steps.length,progress=(session.index+(session.answered?1:0))/total*100;
    const success=session.answered===true,incorrect=session.wrong;
+   const compact=session.index>0&&!session.expanded;
+   const sourceShort=model.item.source.includes("xlsx")?"Excel · "+(model.item.source.split(" · ")[1]||"Exercício"):model.item.source;
    const visual=(session.index>=Math.max(2,total-3) && model.visual!=="none" && window.DUO_FLOW)?
      '<details class="guide-visual"><summary>Ver desenho deste cálculo</summary><div>'+window.DUO_FLOW.sceneSvg(model.visual,model.calc,total-1,total)+'</div></details>':"";
    return '<div class="view guide-view"><button class="back" data-action="guided-exit">‹ Voltar aos exercícios</button>'+
-    '<div class="guide-top"><span class="pill">'+esc(model.item.source)+' '+(model.item.variant?"· Valores alterados":"· Dados originais")+'</span><span class="guide-count">'+(session.index+1)+'/'+total+'</span></div>'+
+    '<div class="guide-top"><span class="pill">'+esc(sourceShort)+' '+(model.item.variant?"· Valores alterados":"· Dados originais")+'</span><span class="guide-count">'+(session.index+1)+'/'+total+'</span></div>'+
     '<div class="guide-progress" role="progressbar" aria-valuenow="'+(session.index+(success?1:0))+'" aria-valuemin="0" aria-valuemax="'+total+'"><span style="width:'+progress.toFixed(1)+'%"></span></div>'+
-    '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement">'+enunciado(model.item,session.revealed)+'</div>'+
-    sourceTable(model.item)+'<div class="guide-translation"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
+    '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement '+(compact?"is-compact":"")+'+">'+enunciado(model.item,session.revealed)+'</div>'+
+    (session.index>0?'<button type="button" class="guide-expand-text" data-action="guided-expand">'+(session.expanded?"Recolher enunciado":"Ver enunciado completo")+"</button>":"" )+
+    sourceTable(model.item)+'<div class="guide-translation '+(compact?"is-compact":"")+'"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
     '<div class="guide-current"><span class="guide-label">PASSO '+(session.index+1)+'</span><h2>'+esc(cur.question)+'</h2>'+
     '<div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
     (success?'<div class="guide-feedback good" role="status"><strong>Correto.</strong> '+esc(cur.why)+'</div>':incorrect!==null?'<div class="guide-feedback wrong" role="status">Não é essa. '+esc(session.wrongHint||"Releia o pedido e tente outra alternativa.")+'</div>':"")+
