@@ -314,11 +314,12 @@
    const z=zValue(item.conf||95),s=[],isP=item.type==="sampleProp";
    const opinion=item.title==="Pesquisa de opinião";
    const task=isP?(opinion?"entrevistas":"testes"):"medições de resposta da API";
+   const questionQuantity=isP&&!opinion?"Quantos":"Quantas";
    const goal=isP?(opinion?"a porcentagem de pessoas que compartilham certa opinião":"a porcentagem de testes que apresentam falhas"):
      "o tempo médio que a API leva para responder";
    const pText=pct(item.p||0,0),eText=isP?pct(item.err,0)+" pontos percentuais":fmt(item.err,0)+" "+(item.unit||"ms");
    s.push(step("O que a equipe precisa decidir ANTES de começar?",
-     "Quantas "+task+" deverá fazer",
+     questionQuantity+" "+task+" deverá fazer",
      ["Qual será o resultado exato de cada observação","Que resultado os próximos testes terão, um por um","Se a pesquisa já provou a conclusão"],
      "A equipe ainda não coletou os novos dados. Por isso precisa planejar a quantidade mínima para uma estimativa confiável.",[],
      "Pense no objetivo da história: há uma pesquisa ou teste futuro para organizar."));
@@ -374,7 +375,7 @@
      (isP?", p = "+fmt(item.p,2)+" e E = "+fmt(item.err,2):", desvio = "+fmt(item.sd,0)+" e E = "+fmt(item.err,0))+
      ". Depois, calculamos o resultado numérico.",[],
      "A pergunta é QUANTOS coletar: a incógnita da conta é n."));
-   s.push(intStep("Depois de calcular e arredondar para cima, quantas "+task+" serão necessárias?",
+   s.push(intStep("Depois de calcular e arredondar para cima, "+questionQuantity.toLowerCase()+" "+task+" serão necessários?",
      n,"A conta resulta em "+fmt(raw,2)+". Como não existe fração de "+(opinion?"entrevista":"teste")+
      ", arredondamos para cima: "+fmt(n,0)+".",["result"]," observações"));
    s.push(step("No final, o número "+fmt(n,0)+" serve para quê?",
@@ -383,7 +384,7 @@
       "Provar que a porcentagem histórica nunca mudará","Confirmar que não existirão erros nos testes"],
      "A conta determina a quantidade mínima para o plano de pesquisa, sob as hipóteses usadas; ela não prevê o resultado exato de cada teste.",["meaning"],
      "O resultado é uma QUANTIDADE de medições, não uma porcentagem."));
-   return {item,translation:(item.goal||("A pergunta é quantas "+task+" realizar."))+" Primeiro vamos entender os números; só depois escolheremos a conta.",
+   return {item,translation:(item.goal||("A pergunta é "+questionQuantity.toLowerCase()+" "+task+" realizar."))+" Primeiro vamos entender os números; só depois escolheremos a conta.",
      steps:s,result:fmt(n,0)+" observações",
      meaning:"A equipe deverá coletar pelo menos "+fmt(n,0)+" "+task+" para buscar a precisão definida, se as condições do planejamento forem atendidas.",
      visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
