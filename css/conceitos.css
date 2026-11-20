@@ -1,0 +1,40 @@
+/* DUOSTATIC — vocabulário acessível, cada explicação abre ao tocar.
+   A área fica recolhida para manter a pergunta visível no celular. */
+.guide-glossary{
+  margin:11px 0 2px;border:1px solid #91505d;border-radius:12px;
+  background:linear-gradient(130deg,#39242f,#27202a);
+  overflow:hidden;
+}
+.guide-glossary>summary{
+  display:flex;align-items:center;justify-content:space-between;gap:9px;
+  padding:12px 14px;cursor:pointer;color:#f3cfb8;font-size:.91rem;font-weight:700;
+  list-style:none;
+}
+.guide-glossary>summary::-webkit-details-marker{display:none}
+.guide-glossary>summary:before{
+  content:"▸";display:inline-block;font-size:1.15rem;color:#ff939a;
+  transform-origin:center;transition:transform .15s;
+}
+.guide-glossary[open]>summary:before{transform:rotate(90deg)}
+.guide-glossary>summary>span{flex:1}
+.guide-glossary>summary small{color:#cba4a7;font-size:.7rem;font-weight:400;line-height:1.4;text-align:right;max-width:120px}
+.guide-glossary-list{padding:0 11px 11px;display:grid;gap:6px}
+.guide-definition{border:1px solid #6e4853;border-radius:9px;background:#261c26;overflow:hidden}
+.guide-definition>summary{cursor:pointer;padding:10px 12px;color:#edc4b5;font-size:.91rem;line-height:1.35;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.guide-definition>summary:after{content:"⌄";font-size:1.15rem;transform:rotate(0);transition:transform .18s;color:#ffc7a0}
+.guide-definition[open]>summary:after{transform:rotate(180deg)}
+.guide-definition>summary::-webkit-details-marker{display:none}
+.guide-definition>div{padding:1px 12px 12px;border-top:1px solid #5d3e48}
+.guide-definition>div p{margin:9px 0;color:#e5d3c8;font-size:.87rem;line-height:1.52}
+.guide-definition>div .guide-specific{background:#18372b;border-left:3px solid #88e9ae;border-radius:6px;padding:10px 12px;color:#e5ffee}
+.guide-definition>div .guide-specific strong{color:#abffc7}
+.guide-glossary summary:focus-visible{outline:2px solid #f6b899;outline-offset:-2px}
+@media(max-width:600px){
+ .guide-glossary>summary{padding:10px 12px;font-size:.84rem}
+ .guide-glossary>summary small{font-size:.66rem}
+ .guide-definition>summary{padding:9px 11px;font-size:.86rem}
+ .guide-definition>div p{font-size:.84rem}
+}
+@media(prefers-reduced-motion:reduce){
+ .guide-glossary>summary:before,.guide-definition>summary:after{transition:none}
+}
