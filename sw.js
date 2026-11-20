@@ -1,6 +1,6 @@
 /* DuoStatic — estudo offline. Mude a versão ao atualizar a lista de arquivos. */
 const CACHE_PREFIX="duostatic-app-";
-const CACHE_VERSION="duostatic-app-v2026-11-20-4";
+const CACHE_VERSION="duostatic-app-v2026-11-20-5";
 const OFFLINE_ASSETS=[
  "./",
  "./index.html",
