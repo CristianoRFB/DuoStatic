@@ -10,13 +10,14 @@
  const root=document.getElementById("app");
  if(!root||!DATA){if(root)root.textContent="Não foi possível carregar os dados de estudo.";return;}
  const KEY="duostatic-carmesim-v1";
- const defaultState=()=>({xp:0,streak:0,best:0,correct:0,total:0,progress:{},settings:{values:"real",sound:false,reducedMotion:false},selectedTopics:[],libraryTopic:"corr",view:"trilha",session:null});
+ const defaultState=()=>({xp:0,streak:0,best:0,correct:0,total:0,progress:{},settings:{values:"real",sound:true,soundVersion:2,reducedMotion:false},completedExcel:{},selectedTopics:[],libraryTopic:"corr",view:"trilha",session:null});
  function readState(){
    let s=defaultState();
    try{
      const old=JSON.parse(localStorage.getItem(KEY)||"null");
      if(old&&typeof old==="object"){
-       s={...s,...old,settings:{...s.settings,...(old.settings||{})},progress:{...(old.progress||{})}};
+       s={...s,...old,settings:{...s.settings,...(old.settings||{})},progress:{...(old.progress||{})},completedExcel:{...(old.completedExcel||{})}};
+       if(s.settings.soundVersion!==2){s.settings.sound=true;s.settings.soundVersion=2}
        s.session=null;s.view="trilha";
        s.selectedTopics=Array.isArray(s.selectedTopics)?s.selectedTopics.filter(t=>DATA.topics.some(x=>x.id===t)).slice(0,2):[];
      }
@@ -24,6 +25,8 @@
    return s;
  }
  let state=readState();
+ let guidedSession=null;
+ let excelFilter="all";
  let flowStep=0;
  let demoCache={};
  function getDemo(id){
@@ -213,6 +216,89 @@
    if(kind==="bars")return prefix+'<path d="M32 183H273" stroke="#99747f" stroke-width="3"/>'+[[46,73],[90,118],[134,150],[178,178],[222,195]].map(([x,height],i)=>'<rect x="'+x+'" y="'+(182-height/1.4)+'" width="29" height="'+height/1.4+'" rx="6" fill="'+(i===4?'#f36373':'#8f3148')+'" stroke="#e9a3aa"/>').join("")+'<text x="77" y="32" font-size="13" fill="#dcb9ae">Mais precisão = mais dados</text>'+end;
    return prefix+pointsSVG([[1,10],[2,22],[3,30],[4,40]],true)+end;
  }
+ function availableCases(topicId){
+   return (window.EXCEL_CASES||[]).filter(c=>!topicId||topicId==="all"||c.topic===topicId);
+ }
+ function makeFallback(topicId){
+   const numeric={amostra:["sampleProp","sampleMean"],z:["z"]}[topicId]||[];
+   const examples=DATA.questions.filter(q=>q.t===topicId&&numeric.includes(q.kind));
+   if(!examples.length)return null;
+   const raw=rand(examples),prepared=buildQuestion(raw),c=prepared.calc;
+   if(!c)return null;
+   return {id:"revisao-"+raw.label+"-"+raw.kind,topic:topicId,type:c.kind,title:raw.label||topic(topicId).title,
+     statement:prepared.context+" "+prepared.prompt,source:raw.src||"Exercício da aula",
+     p:c.p,sd:c.sd,err:c.err,conf:c.conf,mean:c.mean,value:c.v,unit:c.unit,
+     tokens:{},generated:true};
+ }
+ function excelPage(){
+   const filtered=availableCases(excelFilter);
+   return '<div class="view"><p class="eyebrow">▦ PRÁTICA COM AS PLANILHAS</p><h1>Exercícios do Excel</h1>'+
+     '<p class="excel-intro">Resolva as atividades da professora do começo ao fim. Em cada pergunta, escolha o dado, faça a conta e interprete — sem respostas antecipadas.</p>'+
+     '<p class="excel-note">Os exemplos e exercícios são das caixas de texto das planilhas. A aba “Tabela Slide” contém dados sem enunciados; os desafios criados a partir dela estão identificados.</p>'+
+     '<div class="excel-categories"><button data-action="excel-filter" data-topic="all" class="'+(excelFilter==="all"?"active":"")+'">Todos ('+availableCases("all").length+')</button>'+
+     DATA.topics.map(t=>{const n=availableCases(t.id).length;return n?'<button data-action="excel-filter" data-topic="'+t.id+'" class="'+(excelFilter===t.id?"active":"")+'">'+t.title+' ('+n+')</button>':""}).join("")+'</div>'+
+     '<div class="excel-grid">'+filtered.map((c,i)=>'<button class="excel-card" data-action="guided-start" data-id="'+esc(c.id)+'"><span>'+esc(c.source.split(" · ")[0])+' · '+(c.generated?"Treino com dados":"Exercício real")+'</span><strong>'+esc(c.title)+'</strong><small>'+(state.completedExcel[c.id]?"✓ Concluído":"Fazer passo a passo ›")+'</small></button>').join("")+'</div>'+
+     '<div class="quick-actions"><button class="btn btn-primary" data-action="guided-infinite">Praticar Excel sem parar ∞</button></div></div>';
+ }
+ function startGuided(item,origin){
+   if(!item||!window.DUO_GUIDED)return;
+   let model;
+   try{model=window.DUO_GUIDED.build(item,state.settings.values==="random")}catch(e){console.error("Roteiro indisponível:",e);return;}
+   guidedSession={model,index:0,answered:false,wrong:null,wrongHint:"",revealed:[],origin:origin||"excel",topic:item.topic,
+     infinite:origin==="infinite",done:false};
+   state.view="guided";save();render();window.scrollTo(0,0);
+ }
+ function startGuidedTopic(tid){
+   const items=availableCases(tid);
+   if(items.length){
+     const stage=state.session?.stage||0;
+     startGuided(items[stage%items.length],"lesson");
+   }else{
+     const fallback=makeFallback(tid);
+     if(fallback)startGuided(fallback,"lesson");
+   }
+ }
+ function nextGuidedInfinite(){
+   let topics=state.selectedTopics;
+   let pool=availableCases().filter(c=>!topics.length||topics.includes(c.topic));
+   if(!topics.length||topics.includes("amostra")){const b=makeFallback("amostra");if(b)pool.push(b)}
+   if(!topics.length||topics.includes("z")){const b=makeFallback("z");if(b)pool.push(b)}
+   if(!pool.length)pool=availableCases();
+   const last=guidedSession?.model?.item?.id;
+   const options=pool.filter(c=>c.id!==last);
+   startGuided(rand(options.length?options:pool),"infinite");
+ }
+ function submitGuided(choice){
+   const g=guidedSession;if(!g||g.done||g.answered)return;
+   const step=g.model.steps[g.index],correct=choice===step.right;
+   if(correct){
+     g.answered=true;g.wrong=null;
+     g.revealed=[...new Set([...g.revealed,...step.reveal])];
+     state.xp+=12;state.correct+=1;state.total+=1;state.streak+=1;state.best=Math.max(state.best,state.streak);
+   }else{
+     g.wrong=choice;g.wrongHint="Observe o que o enunciado pede. A resposta correta não foi revelada.";
+     state.streak=0;
+   }
+   playSound(correct);
+   save();render();
+ }
+ function advanceGuided(){
+   const g=guidedSession;if(!g||!g.answered)return;
+   if(g.index>=g.model.steps.length-1){
+     g.done=true;
+     state.completedExcel[g.model.item.id]=true;
+     if(g.origin==="lesson"&&state.session?.kind==="lesson"){
+       const s=state.session;
+       state.progress[s.topic]=Math.max(state.progress[s.topic]||0,s.stage+1);
+     }
+     save();
+   }else{g.index++;g.answered=false;g.wrong=null;g.wrongHint="";}
+   render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"});
+ }
+ function exitGuided(){
+   const origin=guidedSession?.origin;
+   go(origin==="lesson"?"trilha":origin==="infinite"?"infinito":"excel");
+ }
  function heroIntro(){
    return '<section class="hero"><div class="hero-text"><p class="eyebrow">✦ SUA JORNADA COMEÇA AQUI</p><h1>Domine a <span style="color:#ff8d97">estatística</span>, sem decorar cegamente.</h1><p>Leia os enunciados, identifique o que eles pedem e escolha o raciocínio correto. Uma missão de cada vez.</p><div class="hero-actions"><button class="btn btn-primary" data-action="continue">Continuar a trilha ›</button><button class="btn btn-outline" data-nav="infinito">Treino infinito ∞</button></div></div><img class="hero-img" src="assets/arle-calma.webp" alt="Arlecchino chibi sorridente, recebendo o estudante" decoding="async"></section>'
  }
@@ -263,15 +349,15 @@
  }
  function render(){
    document.body.classList.toggle("reduce-motion",Boolean(state.settings.reducedMotion));
-   root.innerHTML=({trilha:home,infinito:infinite,biblioteca:library,configuracoes:settings,intro,quiz:renderQuiz,finished:renderFinished})[state.view]?.()||home();
+   root.innerHTML=({trilha:home,infinito:infinite,excel:excelPage,guided:()=>guidedSession?(guidedSession.done?window.DUO_GUIDED.finished(guidedSession):window.DUO_GUIDED.render(guidedSession)):excelPage(),biblioteca:library,configuracoes:settings,intro,quiz:renderQuiz,finished:renderFinished})[state.view]?.()||home();
    if(window.DUO_OFFLINE)window.DUO_OFFLINE.updateUI();
-   const navView=["intro","quiz","finished"].includes(state.view)?state.session?.kind==="infinite"?"infinito":"trilha":state.view;
+   const navView=state.view==="guided"?(guidedSession?.origin==="infinite"?"infinito":guidedSession?.origin==="lesson"?"trilha":"excel"):["intro","quiz","finished"].includes(state.view)?state.session?.kind==="infinite"?"infinito":"trilha":state.view;
    document.querySelectorAll("[data-nav]").forEach(el=>el.classList.toggle("active",el.dataset.nav===navView));
    const headerXP=document.getElementById("header-xp"),headerStreak=document.getElementById("header-streak");
    if(headerXP)headerXP.textContent=state.xp;
    if(headerStreak)headerStreak.textContent=state.streak;
  }
- function go(view){if(!["trilha","infinito","biblioteca","configuracoes"].includes(view))view="trilha";state.view=view;flowStep=0;save();render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"})}
+ function go(view){if(!["trilha","infinito","biblioteca","configuracoes","excel"].includes(view))view="trilha";state.view=view;flowStep=0;save();render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"})}
  function lessonCount(stage){const t=state.session?.topic;const pool=DATA.questions.filter(q=>q.t===t&&q.level<=stage).length;return Math.max(1,Math.min(stage===0?3:stage===1?4:5,pool))}
  function prepareLesson(tid,stage){
    if(!DATA.topics.some(t=>t.id===tid))return;
@@ -281,11 +367,9 @@
  }
  function begin(){
    const s=state.session;if(!s)return;
-   state.view="quiz";nextQuestion();
+   startGuidedTopic(s.topic);
  }
- function startInfinite(){
-   state.session={kind:"infinite",topic:null,stage:3,asked:[],count:0,correct:0,gained:0,chosen:null,question:null};state.view="quiz";nextQuestion()
- }
+ function startInfinite(){nextGuidedInfinite()}
  function nextQuestion(){
    const s=state.session;if(!s)return;
    const target=s.kind==="lesson"?lessonCount(s.stage):Infinity;
@@ -302,16 +386,30 @@
    s.question=buildQuestion(chosen);s.chosen=null;flowStep=0;
    render();window.scrollTo({top:0,behavior:state.settings.reducedMotion?"instant":"smooth"});
  }
- function playSound(){
+ function playSound(isCorrect=true){
    if(!state.settings.sound)return;
    try{
-     const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-     const ctx=new AC(),o=ctx.createOscillator(),g=ctx.createGain();
-     o.type="sine";o.frequency.setValueAtTime(600,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(920,ctx.currentTime+.13);
-     g.gain.setValueAtTime(.08,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);
-     o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+.2);o.onended=()=>ctx.close();
-   }catch(_){}
+     const Audio=window.AudioContext||window.webkitAudioContext;
+     if(!Audio)return;
+     const ctx=new Audio(),now=ctx.currentTime;
+     const tones=isCorrect?[[0,660,.10,"sine"],[.105,880,.17,"sine"]]:[[0,170,.12,"triangle"],[.12,125,.13,"triangle"]];
+     for(const [delay,frequency,duration,shape] of tones){
+       const oscillator=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay;
+       oscillator.type=shape;oscillator.frequency.setValueAtTime(frequency,start);
+       gain.gain.setValueAtTime(.001,start);
+       gain.gain.exponentialRampToValueAtTime(isCorrect?.07:.085,start+.018);
+       gain.gain.exponentialRampToValueAtTime(.001,start+duration);
+       oscillator.connect(gain).connect(ctx.destination);
+       oscillator.start(start);oscillator.stop(start+duration);
+     }
+     // O AudioContext fecha ao terminar sem interromper as notas.
+     const finalTime=now+(isCorrect?.28:.29);
+     const final=ctx.createOscillator();
+     final.connect(ctx.createGain());final.start(finalTime);final.stop(finalTime+.001);
+     final.onended=()=>ctx.close();
+   }catch(error){console.warn("Áudio não disponível:",error)}
  }
+
  function answer(index){
    const s=state.session;
    if(state.view!=="quiz"||!s||s.chosen!==null||index<0||index>=s.question.opts.length)return;
@@ -343,6 +441,14 @@
    if(el.dataset.answer!==undefined){answer(Number(el.dataset.answer));return}
    const action=el.dataset.action;
    switch(action){
+     case"excel-filter":excelFilter=el.dataset.topic||"all";render();break;
+     case"guided-start":{const ex=availableCases().find(x=>x.id===el.dataset.id);if(ex)startGuided(ex,"excel");break;}
+     case"guided-infinite":nextGuidedInfinite();break;
+     case"guided-answer":submitGuided(Number(el.dataset.choice));break;
+     case"guided-next":advanceGuided();break;
+     case"guided-exit":exitGuided();break;
+     case"guided-replay":if(guidedSession)startGuided(guidedSession.model.item,guidedSession.origin);break;
+     case"guided-done":{if(!guidedSession)break;const g=guidedSession;if(g.origin==="infinite")nextGuidedInfinite();else if(g.origin==="lesson"&&state.session?.kind==="lesson"&&state.session.stage<3)prepareLesson(g.topic,state.session.stage+1);else go(g.origin==="lesson"?"trilha":"excel");break;}
      case"continue":{const t=DATA.topics.find(x=>(state.progress[x.id]||0)<4)||DATA.topics[0];prepareLesson(t.id,Math.min(3,state.progress[t.id]||0));break}
      case"stage":prepareLesson(el.dataset.topic,Number(el.dataset.stage));break;
      case"calc-step":{
@@ -388,6 +494,10 @@
    }
  });
  document.addEventListener("keydown",e=>{
+   if(state.view==="guided"&&guidedSession){
+     if(!guidedSession.answered&&/^[1-4]$/.test(e.key)&&!e.altKey&&!e.ctrlKey){submitGuided(Number(e.key)-1);return}
+     if(guidedSession.answered&&e.key==="Enter"){e.preventDefault();advanceGuided();return}
+   }
    if(state.view==="quiz"&&state.session){
      if(state.session.chosen===null&&/^[1-4]$/.test(e.key)&&!e.altKey&&!e.ctrlKey){answer(Number(e.key)-1)}
      else if(state.session.chosen!==null&&e.key==="Enter"){e.preventDefault();nextQuestion()}
