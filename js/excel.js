@@ -91,7 +91,7 @@
  task("excel-corr-6f","Estimar idade a partir de 50 horas",original+" 6f) Estime a idade para um usuário com tempo de acesso de 50 horas.","q6","O que muda quando queremos prever IDADE a partir de HORAS?",["Ajustar uma nova regressão com idade como Y e horas como X","Trocar o sinal de Pearson","Somar todas as idades e horas","Considerar automaticamente 50 anos"],0,"Ajuste idade = a×horas+b, invertendo qual é a variável resposta; não basta inverter ingenuamente uma reta de mínimos quadrados.", "reverseRegression");
  // Tabela Slide.xlsx contém dados, não enunciados. Exercícios extras claramente sinalizados.
  add("corr","excel-tabela-1","Tabela Slide: tipo de escolaridade",
- "Na aba Amostra de Tabela Slide.xlsx há 30 funcionários com escolaridade, salário, idade e tempo de serviço. Qual tipo de variável representa a escolaridade Fundamental, Médio ou Superior?",
+ "Na aba Amostra de Tabela Slide.xlsx há 31 funcionários com escolaridade, salário, idade e tempo de serviço. Qual tipo de variável representa a escolaridade Fundamental, Médio ou Superior?",
  {source:"Tabela Slide.xlsx · Amostra (treino gerado a partir dos dados; não há enunciados na aba)",type:"dataset",mode:"classification",question:"A escolaridade registrada é...",opts:["Qualitativa ordinal","Quantitativa contínua","Qualitativa nominal sem ordenação","Quantitativa discreta"],answer:0,explanation:"Fundamental, Médio e Superior são categorias com ordem de nível.",generated:true});
  add("corr","excel-tabela-2","Tabela Slide: salário e escolaridade",
  "A tabela de funcionários contém salário em reais e escolaridade em níveis. Qual gráfico permite comparar salários por escolaridade?",
