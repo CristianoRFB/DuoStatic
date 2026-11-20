@@ -117,3 +117,17 @@
 .guide-translation{border-left-color:#c87e81}
 .guide-translation p{font-size:.91rem;line-height:1.5}
 .guide-top .pill{max-width:min(640px,calc(100% - 50px))}
+
+
+/* No celular, a pergunta tem prioridade: cabeçalho e história sem excesso de espaço. */
+@media(max-width:690px){
+ .guide-card{padding:15px 13px}
+ .guide-card h1{margin-bottom:12px;font-size:1.65rem}
+ .guide-label{margin-bottom:5px}
+ .guide-statement{padding:12px 13px;font-size:.96rem;line-height:1.48}
+ .guide-translation{margin-top:10px;padding:9px 12px}
+ .guide-translation p{font-size:.88rem;line-height:1.42}
+ .guide-current{margin-top:14px}
+ .guide-current h2{font-size:1.23rem;margin-bottom:10px}
+ .guide-step-context{font-size:.82rem;padding:7px 10px;margin-bottom:10px}
+}
