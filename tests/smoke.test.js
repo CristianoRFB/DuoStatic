@@ -240,3 +240,25 @@ test("amostra e escore Z também possuem resolução guiada",()=>{
    assert.ok(debug.getGuided().model.steps.length>=6);
  }
 });
+
+test("enunciado encurta após o primeiro passo, pode expandir e mantém a marcação dos dados",()=>{
+  const {window,debug,app}=makeApp();
+  const original=window.EXCEL_CASES.find(c=>c.id==="excel-prop-1");
+  debug.startGuided(original,"excel");
+  assert.match(app.innerHTML,/guide-statement/);
+  const g=debug.getGuided();
+  debug.submitGuided(g.model.steps[0].right);
+  debug.advanceGuided();
+  assert.match(app.innerHTML,/guide-statement is-compact/);
+  assert.match(app.innerHTML,/Ver enunciado completo/);
+  debug.submitGuided(debug.getGuided().model.steps[1].right);
+  assert.match(app.innerHTML,/guide-reveal/);
+});
+test("dados completos das duas planilhas podem ser consultados sem ocupar a tela por padrão",()=>{
+  const {window,debug,app}=makeApp();
+  debug.startGuided(window.EXCEL_CASES.find(c=>c.id==="excel-corr-4a"),"excel");
+  assert.match(app.innerHTML,/30 registros/);
+  assert.match(app.innerHTML,/<details class="guide-source-data">/);
+  debug.startGuided(window.EXCEL_CASES.find(c=>c.id==="excel-tabela-1"),"excel");
+  assert.match(app.innerHTML,/31 registros/);
+});
