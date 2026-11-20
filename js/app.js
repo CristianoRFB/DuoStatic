@@ -453,6 +453,7 @@
      case"guided-infinite":nextGuidedInfinite();break;
      case"guided-answer":submitGuided(Number(el.dataset.choice));break;
      case"guided-next":advanceGuided();break;
+     case"guided-expand":if(guidedSession){guidedSession.expanded=!guidedSession.expanded;render()}break;
      case"guided-exit":exitGuided();break;
      case"guided-replay":if(guidedSession)startGuided(guidedSession.model.item,guidedSession.origin);break;
      case"guided-done":{if(!guidedSession)break;const g=guidedSession;if(g.origin==="infinite")nextGuidedInfinite();else if(g.origin==="lesson"&&state.session?.kind==="lesson"&&state.session.stage<3)prepareLesson(g.topic,state.session.stage+1);else go(g.origin==="lesson"?"trilha":"excel");break;}
