@@ -96,5 +96,36 @@
  add("corr","excel-tabela-2","Tabela Slide: salário e escolaridade",
  "A tabela de funcionários contém salário em reais e escolaridade em níveis. Qual gráfico permite comparar salários por escolaridade?",
  {source:"Tabela Slide.xlsx · Amostra (treino gerado a partir dos dados; não há enunciados na aba)",type:"dataset",mode:"chart",question:"Para comparar as distribuições de salário por grupo, qual gráfico é mais informativo?",opts:["BoxPlots de salário separados por escolaridade","Gráfico de linhas ordenado por nome","Reta de regressão com sexo","Diagrama de setores com salário como categoria"],answer:0,explanation:"BoxPlots por categoria mostram mediana, dispersão e valores extremos dos salários.",generated:true});
+
+ // Contexto didático: explica POR QUE cada caso existe. Os enunciados
+ // originais continuam preservados no campo statement.
+ const practicalContexts={
+  "excel-prop-1":"Um órgão público precisa estimar o desemprego em todo um estado, mas não consegue entrevistar todos os moradores. Por isso, escolheu 1.000 pessoas e encontrou 89 desempregados.",
+  "excel-prop-2":"Uma equipe ambiental encontrou peixes impróprios para alimentação em um lago. A pergunta não é quantos estão contaminados, mas qual pode ser a porcentagem de peixes próprios para consumo no lago inteiro.",
+  "excel-prop-3":"Uma pesquisa eleitoral ouviu parte dos eleitores para estimar o apoio ao candidato B na população. Os 40% observados podem não ser exatamente a porcentagem de todos os eleitores.",
+  "excel-prop-4":"Um empreendedor só deseja lançar seu produto se a procura for suficiente. Ele pesquisou consumidores e precisa verificar se o intervalo sustenta a meta mínima de interesse.",
+  "excel-prop-5":"É a mesma decisão de lançar o produto, mas com um grau maior de confiança. Será que a conclusão continua igual quando a faixa fica mais larga?",
+  "excel-prop-6":"Um estudo comparou dois remédios para dor de cabeça. Queremos descobrir se a diferença observada entre as preferências indica uma vantagem real ou pode ser apenas variação da amostra.",
+  "excel-prop-exemplo":"Uma pesquisa eleitoral entrevistou parte da população para estimar a porcentagem real de intenção de voto em um candidato.",
+  "excel-media-1":"Um provedor de internet avalia criar um plano sem limite de horas. Para planejar esse serviço, precisa estimar quanto tempo, em média, os usuários ficam conectados.",
+  "excel-media-2":"Uma escola aplicou uma prova e quer conhecer a média de notas de todos os estudantes. Como só observou uma parte, precisa calcular uma faixa para a média.",
+  "excel-media-3":"Uma empresa de ônibus pesquisou qual valor de passagem parece justo aos passageiros. A pesquisa busca uma faixa para o valor médio considerado ideal.",
+  "excel-media-4":"Uma pesquisa mediu quanto tempo TVs antigas demoravam até ser substituídas. O desafio é estimar a média daquela época e reconhecer que TVs atuais são outra população.",
+  "excel-media-5":"Uma fábrica quer saber a vida útil média de uma grande remessa de lâmpadas e conferir se pode anunciar determinada duração.",
+  "excel-media-6":"Uma indústria de automóveis quer manter a pintura na espessura exigida. Ela mede várias partes da peça e usa uma faixa para verificar se a média parece atender ao padrão.",
+  "excel-media-7":"Um estudante quer saber se a média de idade dos colegas da sua universidade pode ser compatível com a média divulgada para outros pós-graduandos.",
+  "excel-media-8":"Uma fabricante promete carregamento de bateria em até duas horas. Ela mediu 40 celulares e precisa verificar se os dados sustentam essa promessa.",
+  "excel-media-9":"Uma empresa pretende cobrar R$ 50 por um produto. Ela pesquisou o preço que consumidores consideram justo e quer verificar se R$ 50 é compatível com o resultado.",
+  "excel-media-exemplo":"Uma turma mediu a altura de parte dos estudantes. O objetivo é estimar uma faixa para a média de altura de todos os estudantes do grupo estudado."
+ };
+ const corrStory="Uma pesquisa acompanhou 30 usuários de internet. Para cada pessoa foram anotados sexo, idade e tempo de acesso por semana. Cada exercício examina uma característica diferente dessa mesma tabela.";
+ const employeeStory="Uma empresa organizou informações de 31 funcionários, como idade, escolaridade, salário e tempo de serviço. A tarefa é entender como ler e comparar esses dados.";
+ for(const item of cases){
+   item.context=practicalContexts[item.id]||
+     (item.id.startsWith("excel-corr-")?corrStory:
+       item.id.startsWith("excel-tabela-")?employeeStory:"");
+   item.reconstructed=false;
+ }
+
  window.EXCEL_CASES=cases;
 })();
