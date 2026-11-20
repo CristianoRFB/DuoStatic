@@ -318,7 +318,7 @@
    const neededWord=isP&&!opinion?"necessários":"necessárias";
    const goal=isP?(opinion?"a porcentagem de pessoas que compartilham certa opinião":"a porcentagem de testes que apresentam falhas"):
      "o tempo médio que a API leva para responder";
-   const pText=pct(item.p||0,0),eText=isP?pct(item.err,0)+" pontos percentuais":fmt(item.err,0)+" "+(item.unit||"ms");
+   const pText=pct(item.p||0,0),eText=isP?fmt(item.err*100,0)+" pontos percentuais":fmt(item.err,0)+" "+(item.unit||"ms");
    s.push(step("O que a equipe precisa decidir ANTES de começar?",
      questionQuantity+" "+task+" deverá fazer",
      ["Qual será o resultado exato de cada observação","Que resultado os próximos testes terão, um por um","Se a pesquisa já provou a conclusão"],
@@ -338,7 +338,7 @@
      s.push(step("O histórico fala em "+pText+". O que isso quer dizer?",
        meaning.charAt(0).toUpperCase()+meaning.slice(1),
        ["O próximo teste obrigatoriamente dará falha","Exatamente "+fmt(item.p*100,0)+" pessoas precisam ser entrevistadas","A pesquisa já está concluída"],
-       "A taxa anterior é uma referência, não uma certeza sobre os próximos testes. Em estatística, chamamos essa proporção esperada de p.",["p"],
+       "A taxa anterior é uma referência, não uma certeza sobre os próximos testes. É a porcentagem esperada para o grupo estudado.",["p"],
        "Porcentagem é uma parte de 100: 15% significa 15 em cada 100."));
    const remaining=1-item.p;
    const alternatives=[
@@ -361,14 +361,14 @@
    s.push(step("O erro máximo permitido é "+eText+". Para que ele serve?",
      "Para limitar o quanto a estimativa pode se afastar do valor real",
      ["Para limitar quantos testes podem falhar","Para garantir que nunca acontecerá uma falha","Para dizer quantas pessoas já responderam"],
-     "A margem de erro E é uma meta de precisão. "+(isP?
-       "Uma taxa estimada de 15% com margem de 3 pontos pode formar uma faixa de 12% a 18%.":
+     "A margem de erro é uma meta de precisão. "+(isP?
+       "Imagine que a taxa futura seja "+pct(item.p,0)+". Uma margem de "+fmt(item.err*100,0)+" pontos percentuais criaria uma faixa de "+pct(item.p-item.err,0)+" até "+pct(item.p+item.err,0)+". Isso é apenas um exemplo da ideia de margem.":
        "Se a média estimada fosse 500 ms, uma margem de 100 ms produziria limites de 400 ms a 600 ms."),["err"],
      isP?"Não confunda: 3% de margem NÃO significa que só 3% dos testes podem falhar.":"Margem de erro é a tolerância da estimativa, não o tempo que cada requisição deve durar."));
    s.push(step("E os "+item.conf+"% de confiança significam o quê?",
      "O nível de confiança usado para planejar a precisão da pesquisa",
      ["Que "+item.conf+"% dos testes darão certo","Que a resposta será exatamente igual ao valor real","Que "+item.conf+"% dos participantes concordam com a pesquisa"],
-     "A ideia é que, repetindo muitas amostragens semelhantes, cerca de "+item.conf+"% dos intervalos calculados pelo método incluiriam o valor real. Esse nível define o número crítico z.",["conf"],
+     "Se repetíssemos muitas pesquisas semelhantes, cerca de "+item.conf+"% dos intervalos calculados por esse método conteriam o valor verdadeiro. A confiança também indica qual número usar na tabela da aula.",["conf"],
      "Confiança é sobre o MÉTODO da pesquisa. Não é a porcentagem de testes que passarão."));
    if(isP){
      s.push(step("Como escrever as duas porcentagens para calcular?",
@@ -389,7 +389,7 @@
      "A pergunta é QUANTOS coletar: a incógnita da conta é n."));
    s.push(intStep("Depois de calcular e arredondar para cima, "+questionQuantity.toLowerCase()+" "+task+" serão "+neededWord+"?",
      n,"A conta resulta em "+fmt(raw,2)+". Como não existe fração de "+(opinion?"entrevista":"teste")+
-     ", arredondamos para cima: "+fmt(n,0)+".",["result"]," observações"));
+     ", arredondamos para cima: "+fmt(n,0)+".",["result"]," "+task));
    s.push(step("No final, o número "+fmt(n,0)+" serve para quê?",
      "Planejar PELO MENOS "+fmt(n,0)+" observações com a precisão escolhida",
      ["Garantir que exatamente "+fmt(n,0)+" observações darão o mesmo resultado",
@@ -397,7 +397,7 @@
      "A conta determina a quantidade mínima para o plano de pesquisa, sob as hipóteses usadas; ela não prevê o resultado exato de cada teste.",["meaning"],
      "O resultado é uma QUANTIDADE de medições, não uma porcentagem."));
    return {item,translation:(item.goal||("Precisamos descobrir "+questionQuantity.toLowerCase()+" "+task+" realizar.")),
-     steps:s,result:fmt(n,0)+" observações",
+     steps:s,result:fmt(n,0)+" "+task,
      meaning:"A equipe deverá coletar pelo menos "+fmt(n,0)+" "+task+" para buscar a precisão definida, se as condições do planejamento forem atendidas.",
      visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
  }
