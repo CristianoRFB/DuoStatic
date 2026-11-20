@@ -160,13 +160,13 @@
      [fmt(zValue(90),3),fmt(zValue(95),3),fmt(zValue(99),3),"0,500"].filter(x=>x!==fmt(z,3)),
      "O nível de confiança escolhe o valor crítico da distribuição normal.",["conf"]));
    if(item.extra==="standardError"){
-     s.push(numStep("Qual é o erro padrão da proporção?",se*100,"p.p.",
+     s.push(numStep("Qual é o erro padrão da proporção?",se*100,"pontos percentuais",
        "Erro padrão = √[p(1−p)/n]. A margem de erro do IC ainda multiplica por z.",[],2));
    }
    s.push(step("Como calculamos a margem de erro E?","z × √[p(1−p) ÷ n]",
      ["p × n","média × desvio padrão","somente z ÷ n"],
      "Aqui trabalhamos com a proporção p (em decimal) e seu erro padrão.",[]));
-   s.push(numStep("Qual é a margem E em pontos percentuais?",margin*100,"p.p.",
+   s.push(numStep("Qual é a margem E em pontos percentuais?",margin*100,"pontos percentuais",
      "E = "+fmt(z,3)+" × √["+fmt(p,3)+"×(1−"+fmt(p,3)+")/"+item.n+"] ≈ "+pct(margin,2)+" ponto(s) percentuais.",[],2));
    s.push(step("Qual intervalo representa a resposta?",limits(p,margin,true),
      [limits(p,margin,true,.5),limits(p,margin,true,2),limits(p,margin,true,1.5)],
@@ -525,7 +525,10 @@
     sourceTable(model.item)+'<div class="guide-translation '+(compact?"is-compact":"")+'"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
     (window.DUO_PLAIN?window.DUO_PLAIN.glossary(model):"")+
     '<div class="guide-current"><span class="guide-label">PASSO '+(session.index+1)+'</span><h2>'+esc(cur.question)+'</h2>'+
-    '<div class="guide-step-context">'+esc(cur.guide||window.DUO_GUIDED.hintFor(cur.question,model.item))+'</div><div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
+    '<div class="guide-step-context">'+esc(cur.guide||window.DUO_GUIDED.hintFor(cur.question,model.item))+'</div>'+
+    (window.DUO_HELP?window.DUO_HELP.help(model,cur,session.index):"")+
+    (window.DUO_HELP?window.DUO_HELP.table(model):"")+
+    '<div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
     (success?'<div class="guide-feedback good" role="status"><strong>Correto.</strong> '+esc(cur.why)+'</div>':incorrect!==null?'<div class="guide-feedback wrong" role="status">Não é essa. '+esc(session.wrongHint||"Releia o pedido e tente outra alternativa.")+'</div>':"")+
     '<div class="guide-bottom">'+(success?'<button class="btn btn-primary" data-action="guided-next">'+(session.index===total-1?"Ver conclusão":"Continuar ›")+'</button>':'<span class="muted tiny">Responda para liberar o próximo passo.</span>')+'</div></div>'+
     visual+'</div></div>';
