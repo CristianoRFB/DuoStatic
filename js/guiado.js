@@ -8,11 +8,11 @@
  const zValue=c=>({90:1.645,95:1.96,99:2.575})[c]||1.96;
  const randomItem=a=>a[Math.floor(Math.random()*a.length)];
  const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b};
- function step(question,correct,wrong,why,reveal=[]){
+ function step(question,correct,wrong,why,reveal=[],guide=""){
    const candidates=[correct,...wrong].filter((v,i,a)=>a.indexOf(v)===i);
    if(candidates.length<4)throw new Error("Passo com menos de 4 opções: "+question);
    const opts=shuffle(candidates.slice(0,4));
-   return {question,options:opts,right:opts.indexOf(correct),why,reveal};
+   return {question,options:opts,right:opts.indexOf(correct),why,reveal,guide};
  }
  function numStep(question,value,unit,reason,reveal,digits=2){
    const n=Number(value),s=Math.max(Math.abs(n)*.08,Math.pow(10,-digits)*7);
@@ -66,7 +66,7 @@
      why:"A incerteza se refere ao parâmetro populacional estimado a partir da amostra."};
  }
  function materialize(raw,random){
-   if(!random||!["mean","prop"].includes(raw.type))return {...raw,tokens:{...(raw.tokens||{})},variant:false};
+   if(!random||!["mean","prop"].includes(raw.type))return {...raw,tokens:{...(raw.tokens||{})},variant:!!raw.variant};
    const item={...raw,tokens:{...(raw.tokens||{})},variant:true};
    const changes={};
    const opts=[.82,1.12,1.35];
@@ -347,7 +347,7 @@
      "A margem de erro E é uma meta de precisão. "+(isP?
        "Uma taxa estimada de 15% com margem de 3 pontos pode formar uma faixa de 12% a 18%.":
        "Se a média estimada fosse 500 ms, uma margem de 100 ms produziria limites de 400 ms a 600 ms."),["err"],
-     "Não confunda: '3% de erro' aqui NÃO significa que apenas 3% dos testes podem falhar."));
+     isP?"Não confunda: 3% de margem NÃO significa que só 3% dos testes podem falhar.":"Margem de erro é a tolerância da estimativa, não o tempo que cada requisição deve durar."));
    s.push(step("E os "+item.conf+"% de confiança significam o quê?",
      "O nível de confiança usado para planejar a precisão da pesquisa",
      ["Que "+item.conf+"% dos testes darão certo","Que a resposta será exatamente igual ao valor real","Que "+item.conf+"% dos participantes concordam com a pesquisa"],
@@ -379,7 +379,7 @@
       "Provar que a porcentagem histórica nunca mudará","Confirmar que não existirão erros nos testes"],
      "A conta determina a quantidade mínima para o plano de pesquisa, sob as hipóteses usadas; ela não prevê o resultado exato de cada teste.",["meaning"],
      "O resultado é uma QUANTIDADE de medições, não uma porcentagem."));
-   return {item,translation:item.goal||("A pergunta é quantas "+task+" realizar. Primeiro entendemos os dados, depois calculamos um número mínimo."),
+   return {item,translation:(item.goal||("A pergunta é quantas "+task+" realizar."))+" Primeiro vamos entender os números; só depois escolheremos a conta.",
      steps:s,result:fmt(n,0)+" observações",
      meaning:"A equipe deverá coletar pelo menos "+fmt(n,0)+" "+task+" para buscar a precisão definida, se as condições do planejamento forem atendidas.",
      visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
@@ -428,6 +428,20 @@
    }
    return parts;
  }
+ function hintFor(question,item){
+   const q=question.toLowerCase();
+   if(/amostra|tamanho da amostra|\bn\?/.test(q))return "Amostra é o grupo de pessoas, itens ou medições que foi observado. n é a quantidade de elementos.";
+   if(/proporção|porcentagem|taxa/.test(q))return "Proporção é a parte de um total: 15 em cada 100 correspondem a 15%.";
+   if(/média/.test(q))return "Média é um valor que representa o grupo: soma dos valores dividida pela quantidade de valores.";
+   if(/desvio/.test(q))return "Desvio padrão indica o quanto as medições variam em relação à média.";
+   if(/margem|erro máximo/.test(q))return "Margem de erro é o quanto de imprecisão a pesquisa aceita, não a taxa de falhas.";
+   if(/confiança|crítico/.test(q))return "Nível de confiança indica a confiabilidade do método em muitas amostragens semelhantes.";
+   if(/intervalo|\bic\b/.test(q))return "Intervalo de confiança é uma faixa de valores plausíveis para a média ou a porcentagem da população.";
+   if(/regressão|reta/.test(q))return "Regressão usa uma variável conhecida para estimar outra, por meio de uma reta.";
+   if(/correlação/.test(q))return "Correlação mede se duas grandezas variam juntas e em que direção.";
+   if(/escore z/.test(q))return "O escore Z mede quantos desvios-padrão um valor está acima ou abaixo da média.";
+   return "Primeiro entenda o pedido da história. A fórmula vem depois.";
+ }
  function render(session){
    const model=session.model,cur=model.steps[session.index];
    if(!cur)return "";
@@ -444,7 +458,7 @@
     (session.index>0?'<button type="button" class="guide-expand-text" data-action="guided-expand">'+(session.expanded?"Recolher enunciado":"Ver enunciado completo")+"</button>":"" )+
     sourceTable(model.item)+'<div class="guide-translation '+(compact?"is-compact":"")+'"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
     '<div class="guide-current"><span class="guide-label">PASSO '+(session.index+1)+'</span><h2>'+esc(cur.question)+'</h2>'+
-    '<div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
+    '<div class="guide-step-context">'+esc(cur.guide||window.DUO_GUIDED.hintFor(cur.question,model.item))+'</div><div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
     (success?'<div class="guide-feedback good" role="status"><strong>Correto.</strong> '+esc(cur.why)+'</div>':incorrect!==null?'<div class="guide-feedback wrong" role="status">Não é essa. '+esc(session.wrongHint||"Releia o pedido e tente outra alternativa.")+'</div>':"")+
     '<div class="guide-bottom">'+(success?'<button class="btn btn-primary" data-action="guided-next">'+(session.index===total-1?"Ver conclusão":"Continuar ›")+'</button>':'<span class="muted tiny">Responda para liberar o próximo passo.</span>')+'</div></div>'+
     visual+'</div></div>';
@@ -458,5 +472,5 @@
      '<p class="muted tiny">Fonte: '+esc(model.item.source)+'</p>'+
      '<div class="guide-footer-actions"><button class="btn btn-quiet" data-action="guided-replay">Repetir</button><button class="btn btn-primary" data-action="guided-done">'+(session.infinite?"Próximo exercício ∞":"Ver exercícios")+'</button></div></div>';
  }
- window.DUO_GUIDED={build,render,finished,stats};
+ window.DUO_GUIDED={build,render,finished,stats,hintFor};
 })();
