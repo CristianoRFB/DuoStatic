@@ -17,6 +17,8 @@ jobs:
         run: |
           node --check js/dados.js
           node --check js/excel.js
+          node --check js/conceitos.js
+          node --check js/ajuda.js
           node --check js/guiado.js
           node --check js/app.js
           node --check js/fluxo.js
