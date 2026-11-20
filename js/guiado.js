@@ -187,9 +187,9 @@
      count30:c(30),cum30:hours.filter(x=>x<=30).length,
      r:xy/Math.sqrt(xx*yy),regA,regB,reverseA,reverseB,estimate50:regA*50+regB,estimate70:regA*70+regB,ageFor50:reverseA*50+reverseB,pairs:ages.map((x,i)=>[x,hours[i]])};
  }
- function dataResult(mode,d){
+ function dataResult(mode,d,itemId){
    const results={
-     frequency:"Frequência relativa = contagem ÷ total",statMean:fmt(d.h,2)+" horas",
+     frequency:itemId==="excel-corr-2a"?"M = 17 (56,7%); F = 13 (43,3%)":itemId==="excel-corr-2b"?"30 h: 7 de 30 = 23,3%":"Até 30 h: 16 de 30 = 53,3%",statMean:fmt(d.h,2)+" horas",
      statMode:"30 horas",statMedian:fmt(d.median,0)+" horas",
      statVariance:fmt(d.varH,2)+" horas²",statStd:fmt(d.sd,2)+" horas",
      quartile:"Q1 = "+fmt(d.q1,2)+"; Q3 = "+fmt(d.q3,2),
@@ -214,9 +214,10 @@
      ["Descobrir um IC de satisfação","Estimar o preço de lâmpadas","Calcular o tamanho de uma pesquisa futura"],
      "Leia o verbo: classificar, construir, calcular, analisar ou estimar.",[]));
    s.push(step(item.question,item.opts[item.answer],item.opts.filter((_,i)=>i!==item.answer),item.explanation,["source"]));
-   const result=dataResult(mode,d);
-   if(["statMean","statMode","statMedian","statVariance","statStd","quartile","outlier","outlierZ","pearson","regression","prediction","extrapolation","reverseRegression"].includes(mode)){
+   const result=dataResult(mode,d,item.id);
+   if(["frequency","statMean","statMode","statMedian","statVariance","statStd","quartile","outlier","outlierZ","pearson","regression","prediction","extrapolation","reverseRegression"].includes(mode)){
      const alternatives={
+       frequency:["17 + 13 = 17","A frequência de 30 h é 30%","Há 30 pessoas com 30 horas de acesso"],
        statMean:[fmt(d.h+5,2)+" horas",fmt(d.sd,2)+" horas","30 horas"],
        statMode:[fmt(d.h,2)+" horas","40 horas","20 horas"],
        statMedian:["35 horas","40 horas",fmt(d.h,2)+" horas"],
@@ -248,7 +249,26 @@
      calc={pairs:d.pairs,r:d.r,a:d.regA,b:d.regB,target:mode==="prediction"?50:70,pred:d.estimate50};
    }
    if(mode==="outlier"||mode==="outlierZ"){visual="escore";calc={z:(60-d.h)/d.sd}}
-   const translation="Ela quer que você "+(mode==="frequency"?"conte ocorrências e divida pelo total":item.question.toLowerCase().replace(/\?$/,""))+". Use os registros da aba Amostra e não outra fórmula só porque aparece no curso.";
+   const descriptions={
+     frequency:"O pedido é contar quantas vezes um valor aparece. A frequência percentual divide pela quantidade total; a acumulada soma as frequências em ordem crescente.",
+     classification:"O exercício quer saber se a variável é um número mensurável ou uma categoria e, quando for categoria, se existe uma ordem.",
+     chart:"O exercício quer que você escolha um gráfico que represente corretamente o tipo de dado.",
+     statMean:"O exercício quer somar as 30 horas registradas e dividir por 30, obtendo um valor médio.",
+     statMode:"O exercício quer encontrar o tempo que aparece mais vezes.",
+     statMedian:"O exercício quer ordenar as 30 horas e olhar os dois valores centrais.",
+     statVariance:"O exercício quer medir a dispersão das horas em torno da média, usando o cálculo amostral.",
+     statStd:"O exercício quer medir quanto as horas variam em torno da média, na própria unidade de horas.",
+     quartile:"O exercício quer dividir os 30 tempos ordenados em quatro partes para construir o BoxPlot.",
+     outlier:"O exercício quer conferir se algum tempo está distante demais dos demais usando as cercas do BoxPlot.",
+     outlierZ:"O exercício quer saber quantos desvios-padrão o valor extremo está afastado da média.",
+     scatter:"O exercício quer colocar cada idade ao lado de seu tempo semanal, criando um ponto no gráfico.",
+     pearson:"O exercício quer saber se idade e tempo semanal variam juntos e o quão forte é essa relação linear.",
+     regression:"O exercício quer encontrar uma reta capaz de estimar as horas a partir da idade.",
+     prediction:"O exercício quer substituir a idade de 50 anos na reta e avaliar se a estimativa é confiável.",
+     extrapolation:"O exercício quer que você diga se prever para 70 anos faz sentido, considerando a faixa estudada.",
+     reverseRegression:"O exercício quer a idade aproximada para quem acessa por 50 horas. Agora a variável que queremos prever é a idade."
+   };
+   const translation=descriptions[mode]||"Leia o enunciado e identifique a pergunta antes de escolher a conta.";
    return {item,translation,steps:s,result,meaning:item.explanation,visual,calc};
  }
  function buildSample(item){
