@@ -100,9 +100,9 @@
  // Contexto didático: explica POR QUE cada caso existe. Os enunciados
  // originais continuam preservados no campo statement.
  const practicalContexts={
-  "excel-prop-1":"Um órgão público precisa estimar o desemprego em todo um estado, mas não consegue entrevistar todos os moradores. Por isso, escolheu 1.000 pessoas e encontrou 89 desempregados.",
+  "excel-prop-1":"Um órgão público precisa estimar o desemprego em todo um estado, mas não consegue entrevistar todos os moradores. Por isso, observa apenas uma amostra e conta quantos estão desempregados.",
   "excel-prop-2":"Uma equipe ambiental encontrou peixes impróprios para alimentação em um lago. A pergunta não é quantos estão contaminados, mas qual pode ser a porcentagem de peixes próprios para consumo no lago inteiro.",
-  "excel-prop-3":"Uma pesquisa eleitoral ouviu parte dos eleitores para estimar o apoio ao candidato B na população. Os 40% observados podem não ser exatamente a porcentagem de todos os eleitores.",
+  "excel-prop-3":"Uma pesquisa eleitoral ouviu parte dos eleitores para estimar o apoio ao candidato B na população. A taxa observada pode não ser exatamente a porcentagem de todos os eleitores.",
   "excel-prop-4":"Um empreendedor só deseja lançar seu produto se a procura for suficiente. Ele pesquisou consumidores e precisa verificar se o intervalo sustenta a meta mínima de interesse.",
   "excel-prop-5":"É a mesma decisão de lançar o produto, mas com um grau maior de confiança. Será que a conclusão continua igual quando a faixa fica mais larga?",
   "excel-prop-6":"Um estudo comparou dois remédios para dor de cabeça. Queremos descobrir se a diferença observada entre as preferências indica uma vantagem real ou pode ser apenas variação da amostra.",
@@ -114,7 +114,7 @@
   "excel-media-5":"Uma fábrica quer saber a vida útil média de uma grande remessa de lâmpadas e conferir se pode anunciar determinada duração.",
   "excel-media-6":"Uma indústria de automóveis quer manter a pintura na espessura exigida. Ela mede várias partes da peça e usa uma faixa para verificar se a média parece atender ao padrão.",
   "excel-media-7":"Um estudante quer saber se a média de idade dos colegas da sua universidade pode ser compatível com a média divulgada para outros pós-graduandos.",
-  "excel-media-8":"Uma fabricante promete carregamento de bateria em até duas horas. Ela mediu 40 celulares e precisa verificar se os dados sustentam essa promessa.",
+  "excel-media-8":"Uma fabricante promete carregamento de bateria em até duas horas. Ela mediu vários celulares e precisa verificar se os dados sustentam essa promessa.",
   "excel-media-9":"Uma empresa pretende cobrar R$ 50 por um produto. Ela pesquisou o preço que consumidores consideram justo e quer verificar se R$ 50 é compatível com o resultado.",
   "excel-media-exemplo":"Uma turma mediu a altura de parte dos estudantes. O objetivo é estimar uma faixa para a média de altura de todos os estudantes do grupo estudado."
  };
