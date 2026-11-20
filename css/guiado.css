@@ -69,3 +69,26 @@
 /* Cinco destinos acessíveis sem rolagem horizontal no celular. */
 @media(max-width:750px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:0}.mobile-nav button{min-width:0}.mobile-nav button small{font-size:.65rem}}
 .reduce-motion .guide-reveal,.reduce-motion .guide-choice{animation:none!important;transition:none!important}
+
+
+/* Lição enxuta; a solução completa abre apenas por escolha do estudante. */
+.guide-intro-page{max-width:920px;margin:auto}
+.guide-intro-card{background:linear-gradient(135deg,#32212d,#231a24);border:1px solid #774557;border-radius:23px;padding:clamp(19px,3vw,34px)}
+.guide-intro-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 20px}
+.guide-intro-head h1{font-size:clamp(1.75rem,3.3vw,2.6rem);margin:15px 0 0}
+.guide-intro-head img{width:110px;max-height:120px;object-fit:contain;flex:none}
+.guide-intro-card h2{font-size:1.22rem;color:#ecc2ae;margin:19px 0 7px}
+.guide-intro-card>p{color:#e9d6d2;font-size:1rem;line-height:1.62}
+.guide-intro-clue{margin:17px 0 13px;padding:13px 17px;border-radius:11px;border:1px solid #734452;background:#2a1d2a}
+.guide-intro-clue strong{font-size:.91rem;color:#f4b5ad}
+.guide-intro-clue p{margin:5px 0 0;color:#eedcd8;font-size:.91rem}
+.guide-more{margin:19px 0;border-radius:13px;border:1px solid #623f50;background:#1e1720}
+.guide-more summary{cursor:pointer;padding:15px 18px;color:#f3bbbd;font-size:.96rem}
+.guide-more>p{padding:0 18px;color:#ecd4cf}
+.guide-more>.formula-box,.guide-more>.notice{margin:16px}
+.guide-more>.calculation-lab{margin:12px}
+@media(max-width:690px){
+ .guide-intro-head img{width:90px}
+ .guide-intro-card .quick-actions{flex-direction:column}
+ .guide-intro-card .quick-actions .btn{width:100%}
+}
