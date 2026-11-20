@@ -65,3 +65,7 @@
  .guide-top .pill{font-size:.68rem}
 }
 @media(prefers-reduced-motion:reduce){.guide-reveal,.guide-choice,.guide-progress>span{animation:none!important;transition:none!important}}
+
+/* Cinco destinos acessíveis sem rolagem horizontal no celular. */
+@media(max-width:750px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:0}.mobile-nav button{min-width:0}.mobile-nav button small{font-size:.65rem}}
+.reduce-motion .guide-reveal,.reduce-motion .guide-choice{animation:none!important;transition:none!important}
