@@ -16,7 +16,18 @@ São seis territórios e quatro casas em cada (24 etapas), em ordem de **priorid
 
 Acompanhamento visual: cada tema tem **fluxograma interativo com nós conectados**, cálculo por etapas, valores do exemplo real ou aleatório e ilustrações SVG. É possível tocar em qualquer etapa para ver como o número foi obtido. 
 
-A sequência de uma etapa é **conceito → exemplo → fluxograma → perguntas → feedback explicativo**. O treino infinito aceita todos os territórios ou até dois escolhidos, sem fim automático.
+A sequência principal agora é **enunciado → tradução em português claro → identificar os dados → escolher a operação → calcular → interpretar**. Cada resposta correta libera apenas a próxima etapa e destaca números no enunciado; respostas incorretas permitem nova tentativa sem entregar o gabarito. O treino infinito aceita todos os territórios ou até dois escolhidos, sem fim automático.
+
+## Exercícios Excel realmente incluídos
+
+- **Intervalo de confiança da proporção:** seis exercícios sobre desemprego, peixes, eleições, lançamento de produto (95% e 99%) e preferência de analgésicos; inclui também o exemplo resolvido do candidato A.
+- **Intervalo de confiança da média:** os nove exercícios da aba `Exercícios` (internet, notas, passagem de ônibus, TV, lâmpadas, pintura, pós-graduação, carregamento e preço de produto) e o exemplo de altura.
+- **Correlação e Regressão Linear:** todos os itens do enunciado original, incluindo classificação das três variáveis; tabelas de frequência, gráficos, média, moda, mediana, variância, desvio, BoxPlot, quartis, outliers, escore Z, correlação, regressão e previsões diretas e inversas.
+- **Tabela Slide.xlsx:** contém apenas uma base de funcionários, sem exercícios escritos. Há dois desafios claramente identificados como **treinos gerados** a partir desses dados.
+
+Total: **41 roteiros** de prática guiada, incluindo exemplos e desafios derivados. O modo Infinito seleciona os roteiros conforme o tema; a aba **Excel** apresenta todos para estudo individual. Na aba Configurações, a opção *Dados aleatórios* recalcula os valores em cenários numéricos, enquanto *Dados reais* mantém os parâmetros originais das planilhas.
+
+Os cálculos usam os valores críticos normais ensinados nos materiais (z = 1,645/1,96/2,575). A variância e o desvio padrão do conjunto de tempos de acesso usam a fórmula **amostral**; os quartis do BoxPlot usam a convenção **inclusiva**. Algumas conclusões exigem verificar se o valor proposto está dentro do intervalo ou se seria uma extrapolação fora dos dados observados.
 
 ## Instalar e usar offline
 
@@ -25,13 +36,15 @@ A sequência de uma etapa é **conceito → exemplo → fluxograma → perguntas
 3. Depois, abra novamente o endereço mesmo sem internet. O site poderá carregar pelo cache.
 4. Opcionalmente, acesse **Configurações → Estudar sem internet → Instalar aplicativo**. No Chrome, se o botão nativo não aparecer, use o menu ⋮ → Instalar aplicativo/Adicionar à tela inicial. No Safari do iOS, Compartilhar → Adicionar à Tela de Início.
 
-**A instalação é opcional:** o modo offline também pode funcionar dentro do navegador. O progresso continua salvo no `localStorage` local. Não há sincronização entre aparelhos: limpar dados do navegador ou desinstalar o aplicativo pode apagar as respostas. A leitura em voz alta depende das vozes disponíveis no dispositivo.
+**A instalação é opcional:** o modo offline também pode funcionar dentro do navegador. O progresso continua salvo no `localStorage` local. O modo offline inclui também `js/excel.js`, `js/guiado.js` e `css/guiado.css`. Não há sincronização entre aparelhos: limpar dados do navegador ou desinstalar o aplicativo pode apagar as respostas. A leitura em voz alta depende das vozes disponíveis no dispositivo.
 
 Arquivos do modo offline: `manifest.webmanifest`, `sw.js`, `js/offline.js` e `assets/app-icon.svg`. O Service Worker usa a estratégia **rede primeiro e cache na ausência de conexão**, com pré-armazenamento de todos os arquivos essenciais. Em ambiente local, o Service Worker funciona em `http://localhost` ou HTTPS, não em `file://`. Para atualizar a lista de recursos armazenados, altere `CACHE_VERSION` em `sw.js`.
 
 ## Dados de aula
 
-O banco contém 53 exercícios-base (os de cálculo também aceitam variações), inspirados nos materiais fornecidos pela professora Andrea P. Silva:
+O jogo contém os 53 exercícios-base anteriores, mais **41 atividades guiadas de planilhas Excel**. As atividades foram extraídas dos textos de caixas/objetos incorporados ao arquivo Excel, além dos valores registrados nas células. O estudo guiado mostra uma decisão por vez, destaca os dados encontrados com animação e toca sinais distintos de acerto e erro.
+
+Os materiais utilizados foram fornecidos em aula pela professora Andrea P. Silva:
 
 - `Correlação e Regressão Linear_AMS.pdf`: servidores, complexidade × bugs, usuários × banda, conceitos e alertas.
 - `Correlação e Regressão Linear.xlsx`: todos os **30 pares** idade × tempo semanal de acesso da aba Amostra.
