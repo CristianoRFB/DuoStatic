@@ -110,3 +110,10 @@
 .guide-translation.is-compact p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
 .guide-expand-text{border:0;background:transparent;color:#f1b7ba;font-size:.8rem;padding:7px 4px 0;text-decoration:underline;text-underline-offset:3px}
 .guide-expand-text:hover{color:#fff4ed}
+
+
+/* Uma pista didática antes da decisão — sem revelar a alternativa correta. */
+.guide-step-context{margin:-4px 0 13px;padding:9px 12px;color:#e7cabe;background:#3a2931;border-left:3px solid #dc9b86;border-radius:7px;font-size:.91rem;line-height:1.49}
+.guide-translation{border-left-color:#c87e81}
+.guide-translation p{font-size:.91rem;line-height:1.5}
+.guide-top .pill{max-width:min(640px,calc(100% - 50px))}
