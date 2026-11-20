@@ -23,6 +23,7 @@ function makeApp(){
   const sandbox={window,document,localStorage,console,Math};
   vm.runInNewContext(read("js/dados.js"),sandbox,{filename:"dados.js"});
   vm.runInNewContext(read("js/excel.js"),sandbox,{filename:"excel.js"});
+  vm.runInNewContext(read("js/conceitos.js"),sandbox,{filename:"conceitos.js"});
   vm.runInNewContext(read("js/guiado.js"),sandbox,{filename:"guiado.js"});
   vm.runInNewContext(read("js/fluxo.js"),sandbox,{filename:"fluxo.js"});
   const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,makeFallback,go,answer,prepareLesson,begin,nextQuestion,startGuided,startGuidedTopic,startInfinite,submitGuided,advanceGuided,getGuided:()=>guidedSession,getState:()=>state,root};render();})();");
@@ -304,4 +305,55 @@ test("contextualização abrange todos os 41 casos Excel sem apagar o enunciado 
     const model=window.DUO_GUIDED.build(c,false);
     assert.ok(model.translation.length>50,c.id);
   }
+});
+
+test("abas explicam os conceitos sem pressupor conhecimento e sem revelar a resposta",()=>{
+  const {window,debug,app}=makeApp();
+  const example={topic:"amostra",type:"sampleProp",title:"Pesquisa de opinião",source:"PDF Tamanho da Amostra",
+    statement:"Uma pesquisa anterior encontrou 30% das pessoas com uma opinião; a nova pesquisa deseja uma margem de erro de 2% e confiança de 95%.",p:.30,err:.02,conf:95};
+  const model=window.DUO_GUIDED.build(example,false);
+  assert.ok(model.steps.length>=9);
+  assert.ok(model.steps.some(s=>s.question.includes("RESTANTE")&&s.options[s.right]==="70%"));
+  assert.ok(model.steps.some(s=>s.options[s.right].includes("30%")&&s.options[s.right].includes("70%")));
+  assert.ok(model.steps.some(s=>s.why.includes("28%")&&s.why.includes("32%")));
+  assert.ok(!model.steps.some(s=>s.question.includes("margem de erro os")));
+  for(const st of model.steps){
+    assert.equal(new Set(st.options).size,4,st.question);
+    assert.doesNotMatch(st.question,/n = z|p = x|E =|z²/);
+    assert.doesNotMatch(st.options.join(" "),/n = z|p = x|E =|z²/);
+  }
+  const html=window.DUO_PLAIN.glossary(model);
+  assert.match(html,/O que é nível de confiança/);
+  assert.match(html,/O que é margem de erro/);
+  assert.match(html,/O que é uma pesquisa ou estudo/);
+  assert.match(html,/30%/);
+  assert.match(html,/70%/);
+  assert.match(html,/svg/);
+  debug.startGuided(example,"excel");
+  assert.match(app.innerHTML,/guide-glossary/);
+  assert.match(app.innerHTML,/guide-definition/);
+});
+test("o texto da margem acompanha os valores reais, não usa números de outro exercício",()=>{
+  const {window}=makeApp();
+  const item={topic:"amostra",type:"sampleProp",title:"Taxa de rejeição",source:"Treino",
+    statement:"Um grupo testou um sistema.",p:.4,err:.04,conf:90};
+  const model=window.DUO_GUIDED.build(item,false);
+  const margin=model.steps.find(s=>s.question.includes("erro máximo permitido"));
+  assert.ok(margin);
+  assert.match(margin.question,/4 pontos percentuais/);
+  assert.match(margin.why,/40%/);
+  assert.match(margin.why,/36%/);
+  assert.match(margin.why,/44%/);
+});
+test("fluxogramas e biblioteca evitam apresentar letras como fórmulas aos iniciantes",()=>{
+ const {window,debug,app}=makeApp();
+ const raw=window.STUDY_DATA.questions.find(q=>q.kind==="sampleProp");
+ const model=debug.buildQuestion(raw);
+ const html=window.DUO_FLOW.render("amostra",model,4);
+ assert.match(html,/Fluxo do cálculo/);
+ assert.doesNotMatch(html,/n = z²|E = z|p = casos/);
+ debug.getState().libraryTopic="prop";
+ debug.go("biblioteca");
+ assert.match(app.innerHTML,/Como fazer a conta, em palavras/);
+ assert.doesNotMatch(app.innerHTML,/Quando chegar a hora de calcular/);
 });
