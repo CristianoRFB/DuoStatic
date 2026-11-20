@@ -443,12 +443,15 @@
  }
  function build(raw,random=false){
    const item=materialize(raw,random);
-   if(item.type==="mean")return buildMean(item);
-   if(item.type==="prop")return buildProp(item);
-   if(item.type==="dataset")return buildDataset(item);
-   if(item.type==="sampleMean"||item.type==="sampleProp")return buildSample(item);
-   if(item.type==="z")return buildZ(item);
-   throw new Error("Exercício sem roteiro: "+item.type);
+   let model;
+   if(item.type==="mean")model=buildMean(item);
+   else if(item.type==="prop")model=buildProp(item);
+   else if(item.type==="dataset")model=buildDataset(item);
+   else if(item.type==="sampleMean"||item.type==="sampleProp")model=buildSample(item);
+   else if(item.type==="z")model=buildZ(item);
+   else throw new Error("Exercício sem roteiro: "+item.type);
+   if(window.DUO_PLAIN)model.steps=model.steps.map(ste=>window.DUO_PLAIN.plainStep(model,ste));
+   return model;
  }
  function enunciado(item,revealed){
    let text=item.statement,parts="",keys=Object.entries(item.tokens||{}).sort((a,b)=>b[1].length-a[1].length);
@@ -502,6 +505,7 @@
     '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement '+(compact?"is-compact":"")+'">'+enunciado(model.item,session.revealed)+'</div>'+
     (session.index>0?'<button type="button" class="guide-expand-text" data-action="guided-expand">'+(session.expanded?"Recolher enunciado":"Ver enunciado completo")+"</button>":"" )+
     sourceTable(model.item)+'<div class="guide-translation '+(compact?"is-compact":"")+'"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
+    (window.DUO_PLAIN?window.DUO_PLAIN.glossary(model):"")+
     '<div class="guide-current"><span class="guide-label">PASSO '+(session.index+1)+'</span><h2>'+esc(cur.question)+'</h2>'+
     '<div class="guide-step-context">'+esc(cur.guide||window.DUO_GUIDED.hintFor(cur.question,model.item))+'</div><div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
     (success?'<div class="guide-feedback good" role="status"><strong>Correto.</strong> '+esc(cur.why)+'</div>':incorrect!==null?'<div class="guide-feedback wrong" role="status">Não é essa. '+esc(session.wrongHint||"Releia o pedido e tente outra alternativa.")+'</div>':"")+
