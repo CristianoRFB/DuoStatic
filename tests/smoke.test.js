@@ -24,6 +24,7 @@ function makeApp(){
   vm.runInNewContext(read("js/dados.js"),sandbox,{filename:"dados.js"});
   vm.runInNewContext(read("js/excel.js"),sandbox,{filename:"excel.js"});
   vm.runInNewContext(read("js/conceitos.js"),sandbox,{filename:"conceitos.js"});
+  vm.runInNewContext(read("js/ajuda.js"),sandbox,{filename:"ajuda.js"});
   vm.runInNewContext(read("js/guiado.js"),sandbox,{filename:"guiado.js"});
   vm.runInNewContext(read("js/fluxo.js"),sandbox,{filename:"fluxo.js"});
   const source=read("js/app.js").replace(/render\(\);\s*\}\)\(\);\s*$/,"window.__test={buildQuestion,makeFallback,go,answer,prepareLesson,begin,nextQuestion,startGuided,startGuidedTopic,startInfinite,submitGuided,advanceGuided,getGuided:()=>guidedSession,getState:()=>state,root};render();})();");
@@ -356,4 +357,58 @@ test("fluxogramas e biblioteca evitam apresentar letras como fórmulas aos inici
  debug.go("biblioteca");
  assert.match(app.innerHTML,/Como fazer a conta, em palavras/);
  assert.doesNotMatch(app.innerHTML,/Quando chegar a hora de calcular/);
+});
+
+test("erro padrão de 89 em 1000 é ensinado por números, sem p.p. corrompido",()=>{
+ const {window,debug,app}=makeApp();
+ const c=window.EXCEL_CASES.find(x=>x.id==="excel-prop-1");
+ assert.ok(c);
+ const model=window.DUO_GUIDED.build(c,false);
+ const ix=model.steps.findIndex(s=>s.question.includes("Quanta variação costuma ocorrer"));
+ assert.ok(ix>=0,"Exercício precisa da etapa de erro padrão");
+ const current=model.steps[ix];
+ assert.match(current.options[current.right],/^0,90 pontos percentuais$/);
+ assert.doesNotMatch(current.options.join(" "),/proporção\.proporção|p\.p\./);
+ const guide=window.DUO_HELP.help(model,current,ix);
+ assert.match(guide,/89/);
+ assert.match(guide,/1\.000/);
+ assert.match(guide,/raiz quadrada/);
+ assert.match(guide,/0,90 pontos percentuais/);
+ assert.match(guide,/Ainda NÃO é a margem/);
+ debug.startGuided(c,"excel");
+ assert.match(app.innerHTML,/Como descobrir a resposta/);
+ assert.match(app.innerHTML,/Consultar tabela de valores/);
+ assert.match(app.innerHTML,/guide-solve/);
+ assert.match(app.innerHTML,/guide-values/);
+});
+test("tabela de referência mostra 90, 95 e 99 por cento com a linha correta",()=>{
+ const {window}=makeApp();
+ const c=window.EXCEL_CASES.find(x=>x.id==="excel-prop-1");
+ const model=window.DUO_GUIDED.build(c,false);
+ const table=window.DUO_HELP.table(model);
+ for(const value of ["90%","95%","99%","1,645","1,960","2,575",'class="guide-value-active"',"linha destacada"]) assert.ok(table.includes(value),value);
+ for(const conf of [90,95,99]){
+   const changed=window.DUO_GUIDED.build({...c,conf},false);
+   const t=window.DUO_HELP.table(changed);
+   assert.ok(t.includes('<tr class="guide-value-active" aria-current="true"><td>'+conf+'%</td>'),conf);
+ }
+});
+test("todo passo das planilhas e exemplos numéricos fornece ajuda sob demanda",()=>{
+ const {window}=makeApp();
+ const inputs=[...window.EXCEL_CASES,
+   {topic:"amostra",type:"sampleProp",title:"Pesquisa de opinião",p:.30,err:.02,conf:95,source:"Aula",statement:"Uma pesquisa encontrou 30% de intenção"},
+   {topic:"amostra",type:"sampleMean",title:"Latência",sd:1250,err:100,conf:95,source:"Aula",statement:"API"},
+   {topic:"z",type:"z",title:"Servidor lento",value:280,mean:200,sd:40,unit:"ms",source:"Aula",statement:"Servidor lento"}
+ ];
+ for(const item of inputs)for(const random of [false,true]){
+   const model=window.DUO_GUIDED.build(item,random);
+   for(let i=0;i<model.steps.length;i++){
+     const st=model.steps[i],view=window.DUO_HELP.help(model,st,i);
+     assert.match(view,/Como descobrir a resposta/);
+     assert.match(view,/Resposta desta etapa/);
+     assert.match(view,/<ol>/);
+     assert.doesNotMatch(view,/NaN|Infinity|proporção\.proporção/);
+     assert.ok(st.options[st.right],item.id||item.title);
+   }
+ }
 });
