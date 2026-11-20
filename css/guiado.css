@@ -1,0 +1,67 @@
+/* DUOSTATIC — uma decisão de cada vez (sem painéis duplicados). */
+.guide-view{max-width:860px;margin:0 auto}
+.guide-view .back{margin-bottom:6px}
+.guide-top{display:flex;justify-content:space-between;align-items:center;gap:13px;margin-bottom:13px}
+.guide-top .pill{font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:min(620px,calc(100% - 70px))}
+.guide-count{color:#dcbdb9;font-size:.89rem;font-variant-numeric:tabular-nums}
+.guide-progress{height:8px;border-radius:20px;background:#52313b;overflow:hidden;margin:0 0 18px}
+.guide-progress>span{height:100%;display:block;background:linear-gradient(90deg,#d62d49,#ff8c91);border-radius:20px;transition:width .22s ease}
+.guide-card{border:1px solid #663748;border-radius:23px;background:linear-gradient(150deg,#322029,#1e1720);padding:clamp(18px,3vw,32px);box-shadow:0 12px 36px #06030565}
+.guide-card h1{font-size:clamp(1.65rem,3vw,2.4rem);margin:0 0 22px}
+.guide-label{font-size:.71rem;letter-spacing:.13em;color:#e3ab9d;font-weight:700;margin:0 0 7px}
+.guide-statement{color:#f1e1db;font-size:clamp(.98rem,1.6vw,1.08rem);line-height:1.62;padding:18px 20px;background:#17121a;border:1px solid #4d3541;border-radius:14px}
+.guide-reveal{color:#e7ffdb;background:#20573f;border:1px solid #88ffd0;border-radius:6px;padding:1px 4px;margin:0 -4px;box-shadow:0 0 0 5px #2fa96a1d,0 0 19px #77eb9f80;animation:guide-glow 1.3s ease-in-out 2}
+.guide-translation{margin:15px 0 0;padding:12px 17px 13px;background:#3c2631;border-left:3px solid #e5a68d;border-radius:9px}
+.guide-translation strong{font-size:.89rem;color:#f4c4a6}
+.guide-translation p{font-size:.96rem;line-height:1.54;margin:5px 0 0;color:#ecd6cf}
+.guide-current{margin-top:25px}
+.guide-current h2{font-size:clamp(1.25rem,2.3vw,1.65rem);margin:3px 0 15px;line-height:1.33}
+.guide-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.guide-choice{font-family:Georgia,serif;display:flex;align-items:center;text-align:left;gap:13px;border:2px solid #62414d;color:#f5e7e1;background:#332630;border-radius:13px;padding:13px 15px;min-height:66px;line-height:1.33;font-size:.99rem;transition:border-color .15s,background .15s,transform .15s}
+.guide-choice:hover:not(:disabled){border-color:#f38a95;background:#48303b;transform:translateY(-1px)}
+.guide-choice b{font-family:Arial,sans-serif;display:grid;place-items:center;min-width:27px;height:27px;border:1px solid #9d6873;background:#3e2936;border-radius:7px;color:#e4b6ba;font-size:.75rem}
+.guide-choice.guide-correct{background:#17452f;border-color:#82eeba;color:#eaffec;animation:guide-good .38s ease}
+.guide-choice.guide-wrong{background:#52232f;border-color:#f08b9d;animation:guide-shake .24s ease}
+.guide-choice.guide-dim{opacity:.65}
+.guide-feedback{padding:11px 14px;margin-top:12px;font-size:.9rem;border-radius:9px;line-height:1.45}
+.guide-feedback.good{background:#1b412e;border:1px solid #4e9866;color:#e7ffe8}
+.guide-feedback.wrong{background:#48242f;border:1px solid #995163;color:#ffdade}
+.guide-bottom{display:flex;justify-content:flex-end;align-items:center;margin-top:17px;min-height:40px}
+.guide-bottom .btn{min-width:166px}
+.guide-visual{margin-top:17px;border:1px solid #56404b;border-radius:13px;background:#1c1720;overflow:hidden}
+.guide-visual summary{cursor:pointer;padding:12px 16px;color:#eac5b1;font-size:.89rem}
+.guide-visual>div{padding:6px 15px 15px;max-height:260px}
+.guide-visual .calc-svg{max-height:230px}
+.guide-finished{max-width:690px;margin:0 auto;text-align:center;padding:20px 0 40px}
+.guide-finished h1{font-size:clamp(1.8rem,4vw,2.75rem)}
+.guide-win{width:174px;max-width:48vw;height:auto;object-fit:contain;margin:0 auto 18px;display:block;filter:drop-shadow(0 12px 16px #03030260)}
+.guide-end-result{margin:22px 0;background:#262029;border:1px solid #885168;border-radius:18px;padding:25px}
+.guide-end-result span{font-size:.75rem;color:#e0bda8;display:block;margin-bottom:10px}
+.guide-end-result strong{font-size:clamp(1.3rem,3vw,2rem);color:#b0ffcc;display:block;line-height:1.35}
+.guide-end-result p{margin:14px 0 0;color:#eed5d3}
+.guide-footer-actions{display:flex;justify-content:center;gap:11px;flex-wrap:wrap}
+.excel-intro{max-width:740px;color:#d8c4c2}
+.excel-categories{display:flex;gap:8px;overflow-x:auto;padding:6px 0 13px;scrollbar-width:thin}
+.excel-categories button{flex:0 0 auto;border:1px solid #704454;padding:10px 13px;border-radius:40px;color:#ecd1cb;background:#362530;white-space:nowrap}
+.excel-categories button.active{background:#b6324c;border-color:#fa7c88;color:#fff}
+.excel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:12px}
+.excel-card{border:1px solid #704456;background:#2b202a;color:#f9e6e2;border-radius:14px;padding:17px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:116px;transition:.16s}
+.excel-card:hover{transform:translateY(-2px);border-color:#f08f95;background:#482c3a}
+.excel-card strong{font-size:1.08rem}
+.excel-card span{font-size:.76rem;color:#cda8ab}
+.excel-card small{color:#aad7b9;font-size:.73rem}
+.excel-note{color:#d6b8b2;font-size:.82rem;border-left:3px solid #a76d78;padding-left:12px}
+@keyframes guide-glow{0%,100%{box-shadow:0 0 0 4px #7fea9c20,0 0 11px #7fea9c33}50%{box-shadow:0 0 0 6px #6fe8a960,0 0 26px #83ffbfde}}
+@keyframes guide-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@keyframes guide-good{0%{filter:brightness(1.1)}40%{filter:brightness(1.4)}100%{filter:brightness(1)}}
+@media(max-width:690px){
+ .guide-card{padding:18px 15px}
+ .guide-choices,.excel-grid{grid-template-columns:1fr}
+ .guide-choice{min-height:61px}
+ .guide-statement{padding:15px 13px}
+ .guide-translation{padding:12px}
+ .guide-current{margin-top:22px}
+ .guide-bottom .btn{width:100%}
+ .guide-top .pill{font-size:.68rem}
+}
+@media(prefers-reduced-motion:reduce){.guide-reveal,.guide-choice,.guide-progress>span{animation:none!important;transition:none!important}}
