@@ -103,3 +103,10 @@
 .guide-table-scroll td{padding:7px 11px;border-bottom:1px solid #483440;color:#e5d7d2}
 .guide-table-scroll tr:nth-child(even){background:#2a2029}
 .guide-source-data>p{font-size:.73rem;color:#b99fa1;padding:0 13px 10px;margin:0}
+
+
+/* Enunciado permanece visível, mas passa a ocupar só quatro linhas após iniciar a resolução. */
+.guide-statement.is-compact{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden;max-height:6.8em}
+.guide-translation.is-compact p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.guide-expand-text{border:0;background:transparent;color:#f1b7ba;font-size:.8rem;padding:7px 4px 0;text-decoration:underline;text-underline-offset:3px}
+.guide-expand-text:hover{color:#fff4ed}
