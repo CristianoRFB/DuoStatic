@@ -307,40 +307,82 @@
    return {item,translation,steps:s,result,meaning:item.explanation,visual,calc};
  }
  function buildSample(item){
-   const z=zValue(item.conf||95),s=[];
-   const isP=item.type==="sampleProp";
-   s.push(step("O que o enunciado pede primeiro?","Planejar quantos dados coletar",
-     ["Calcular um intervalo com dados já coletados","Prever a idade de alguém","Medir correlação entre duas variáveis"],
-     "A pergunta é QUANTOS dados serão necessários; ainda não foi feita a coleta.",[]));
+   const z=zValue(item.conf||95),s=[],isP=item.type==="sampleProp";
+   const opinion=item.title==="Pesquisa de opinião";
+   const task=isP?(opinion?"entrevistas":"testes"):"medições de resposta da API";
+   const goal=isP?(opinion?"a porcentagem de pessoas que compartilham certa opinião":"a porcentagem de testes que apresentam falhas"):
+     "o tempo médio que a API leva para responder";
+   const pText=pct(item.p||0,0),eText=isP?pct(item.err,0)+" pontos percentuais":fmt(item.err,0)+" "+(item.unit||"ms");
+   s.push(step("O que a equipe precisa decidir ANTES de começar?",
+     "Quantas "+task+" deverá fazer",
+     ["Qual será o resultado exato de cada observação","Que resultado os próximos testes terão, um por um","Se a pesquisa já provou a conclusão"],
+     "A equipe ainda não coletou os novos dados. Por isso precisa planejar a quantidade mínima para uma estimativa confiável.",[],
+     "Pense no objetivo da história: há uma pesquisa ou teste futuro para organizar."));
+   s.push(step("O que será medido nessas observações?",
+     goal.charAt(0).toUpperCase()+goal.slice(1),
+     isP?(opinion?["O salário de todos os entrevistados","A idade de cada pessoa em uma única entrevista","O nome da pessoa que organizou a pesquisa"]:
+       ["A quantidade de linhas de código do sistema","O preço de cada teste","Se um único teste isolado é perfeito"]):
+       ["A quantidade de falhas, sem olhar o tempo","O preço de contratação da equipe","A média exata de um único teste"],
+     "Agora identificamos o TIPO de resultado: "+(isP?"é uma contagem de casos dentro de um total. Isso vira porcentagem (também chamada proporção).":
+       "cada requisição produz um número de milissegundos. Queremos calcular a MÉDIA desses tempos."),[],
+     "Pergunte: cada observação terá um número de tempo ou uma resposta do tipo sim/não?"));
    if(isP){
-     s.push(step("O que precisa estimar?","Uma porcentagem ou taxa",
-       ["A média de salários","A reta y=ax+b","A dispersão das alturas"],"A futura pesquisa quer uma proporção.",[]));
-     s.push(step("Qual proporção esperada p usar?",pct(item.p,1),
-       [pct(1-item.p,1),pct(item.p/2,1),"100%"],
-       "Quando o p é conhecido, use o histórico. Se não houver estimativa, p = 50% é conservador.",["p"]));
+     const meaning=opinion?"aproximadamente "+pText+" das pessoas deram a resposta estudada em pesquisas anteriores":
+       "em cada 100 testes antigos, cerca de "+fmt(item.p*100,0)+" apresentaram falhas";
+     s.push(step("O histórico fala em "+pText+". O que isso quer dizer?",
+       meaning.charAt(0).toUpperCase()+meaning.slice(1),
+       ["O próximo teste obrigatoriamente dará falha","Exatamente "+fmt(item.p*100,0)+" pessoas precisam ser entrevistadas","A pesquisa já está concluída"],
+       "A taxa anterior é uma referência, não uma certeza sobre os próximos testes. Em estatística, chamamos essa proporção esperada de p.",["p"],
+       "Porcentagem é uma parte de 100: 15% significa 15 em cada 100."));
    }else{
-     s.push(step("O que precisa estimar?","Uma média",
-       ["Uma taxa de aprovação","Uma porcentagem de falhas","Uma correlação"],"O alvo é uma média populacional.",[]));
-     s.push(numStep("Qual desvio padrão σ informa a variabilidade?",item.sd,"","É a medida de dispersão disponível.",["sd"],0));
+     s.push(step("O desvio padrão anterior é "+fmt(item.sd,0)+" "+(item.unit||"ms")+". O que ele descreve?",
+       "O quanto os tempos costumam variar de uma requisição para outra",
+       ["O tempo exato que toda requisição demora","O número de servidores na empresa","O valor máximo que a API pode atingir"],
+       "Desvio padrão NÃO é a média. Ele mede o espalhamento dos tempos: quanto maior, maior a variabilidade.",["sd"],
+       "A API pode levar tempos diferentes a cada tentativa. O desvio ajuda a medir essas diferenças."));
    }
-   s.push(numStep("Qual é o erro máximo aceitável E?",isP?item.err*100:item.err,isP?"p.p.":"",
-     "O E é a precisão pedida. Para porcentagens, use o equivalente em decimal na fórmula.",["err"],isP?1:0));
-   s.push(step("Qual z usar para o nível de confiança?",fmt(z,3),
-     [fmt(zValue(90),3),fmt(zValue(95),3),fmt(zValue(99),3),"0,500"].filter(x=>x!==fmt(z,3)),
-     "A confiança determina o z crítico.",["conf"]));
+   s.push(step("O erro máximo permitido é "+eText+". Para que ele serve?",
+     "Para limitar o quanto a estimativa pode se afastar do valor real",
+     ["Para limitar quantos testes podem falhar","Para garantir que nunca acontecerá uma falha","Para dizer quantas pessoas já responderam"],
+     "A margem de erro E é uma meta de precisão. "+(isP?
+       "Uma taxa estimada de 15% com margem de 3 pontos pode formar uma faixa de 12% a 18%.":
+       "Se a média estimada fosse 500 ms, uma margem de 100 ms produziria limites de 400 ms a 600 ms."),["err"],
+     "Não confunda: '3% de erro' aqui NÃO significa que apenas 3% dos testes podem falhar."));
+   s.push(step("E os "+item.conf+"% de confiança significam o quê?",
+     "O nível de confiança usado para planejar a precisão da pesquisa",
+     ["Que "+item.conf+"% dos testes darão certo","Que a resposta será exatamente igual ao valor real","Que "+item.conf+"% dos participantes concordam com a pesquisa"],
+     "A ideia é que, repetindo muitas amostragens semelhantes, cerca de "+item.conf+"% dos intervalos calculados pelo método incluiriam o valor real. Esse nível define o número crítico z.",["conf"],
+     "Confiança é sobre o MÉTODO da pesquisa. Não é a porcentagem de testes que passarão."));
+   if(isP){
+     s.push(step("Como escrever as duas porcentagens para calcular?",
+       "Proporção p = "+fmt(item.p,2)+" e erro E = "+fmt(item.err,2),
+       ["p = "+fmt(item.p*100,0)+" e E = "+fmt(item.err*100,0),"p = "+fmt(item.err,2)+" e E = "+fmt(item.p,2),"p = 1 e E = 0"],
+       "Na fórmula entram decimais: por exemplo, 15% vira 0,15 e 3% vira 0,03.",[],
+       "Para passar de porcentagem a decimal, divida por 100."));
+   }
    const raw=isP?z*z*item.p*(1-item.p)/(item.err*item.err):(z*item.sd/item.err)**2;
    const n=Math.ceil(raw-1e-10);
-   const formula=isP?"n = z² × p(1−p) ÷ E²":"n = (z × σ ÷ E)²";
-   s.push(step("Qual fórmula junta esses dados?",formula,
-     ["IC = média ± E","z = (x−média)/desvio","r = covariância/(desvios)"],
-     "Como a pergunta é quantos coletar, a incógnita é n.",[]));
-   s.push(intStep("Quantas observações são necessárias no mínimo?",n,
-     "O cálculo fornece "+fmt(raw,2)+"; para não perder precisão, arredonde para cima.",["result"]," observações"));
-   s.push(step("Por que arredondar para cima?",
-     "Porque o mínimo precisa ser inteiro e não pode ficar abaixo do necessário.",
-     ["Porque todos os intervalos são negativos.","Porque a média é uma porcentagem.","Porque o arredondamento não altera o erro."],
-     "Ex.: n = 544,22 requer no mínimo 545 pessoas.",["meaning"]));
-   return {item,translation:"Ele quer descobrir quantas pessoas, observações ou medições devem ser coletadas para atingir a confiança e o erro máximo exigidos.",steps:s,result:fmt(n,0)+" observações",meaning:"Este número é o mínimo a coletar para a precisão planejada, dadas as hipóteses.",visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
+   const formula=isP?"n = z² × p(1−p) ÷ E²":"n = (z × desvio ÷ E)²";
+   s.push(step("Agora que identificamos os dados, qual conta encontra a quantidade n?",
+     formula,
+     ["Somar todos os números do enunciado","Dividir o erro máximo pela confiança","Usar a média ± margem para estimar uma faixa"],
+     "n significa quantidade necessária de observações. Usamos z = "+fmt(z,3)+
+     (isP?", p = "+fmt(item.p,2)+" e E = "+fmt(item.err,2):", desvio = "+fmt(item.sd,0)+" e E = "+fmt(item.err,0))+
+     ". Depois, calculamos o resultado numérico.",[],
+     "A pergunta é QUANTOS coletar: a incógnita da conta é n."));
+   s.push(intStep("Depois de calcular e arredondar para cima, quantas "+task+" serão necessárias?",
+     n,"A conta resulta em "+fmt(raw,2)+". Como não existe fração de "+(opinion?"entrevista":"teste")+
+     ", arredondamos para cima: "+fmt(n,0)+".",["result"]," observações"));
+   s.push(step("No final, o número "+fmt(n,0)+" serve para quê?",
+     "Planejar PELO MENOS "+fmt(n,0)+" observações com a precisão escolhida",
+     ["Garantir que exatamente "+fmt(n,0)+" observações darão o mesmo resultado",
+      "Provar que a porcentagem histórica nunca mudará","Confirmar que não existirão erros nos testes"],
+     "A conta determina a quantidade mínima para o plano de pesquisa, sob as hipóteses usadas; ela não prevê o resultado exato de cada teste.",["meaning"],
+     "O resultado é uma QUANTIDADE de medições, não uma porcentagem."));
+   return {item,translation:item.goal||("A pergunta é quantas "+task+" realizar. Primeiro entendemos os dados, depois calculamos um número mínimo."),
+     steps:s,result:fmt(n,0)+" observações",
+     meaning:"A equipe deverá coletar pelo menos "+fmt(n,0)+" "+task+" para buscar a precisão definida, se as condições do planejamento forem atendidas.",
+     visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
  }
  function buildZ(item){
    const z=(item.value-item.mean)/item.sd;
