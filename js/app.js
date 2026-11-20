@@ -225,10 +225,48 @@
    if(!examples.length)return null;
    const raw=rand(examples),prepared=buildQuestion(raw),c=prepared.calc;
    if(!c)return null;
-   return {id:"revisao-"+raw.label+"-"+raw.kind,topic:topicId,type:c.kind,title:raw.label||topic(topicId).title,
-     statement:prepared.context+" "+prepared.prompt,source:raw.src||"Exercício da aula",
+   const pctLocal=(number,d=0)=>pct(number,d);
+   let statement="",context="",field="",tokens={},goal="";
+   const title=raw.label||topic(topicId).title;
+   if(raw.kind==="sampleProp"){
+     if(title==="Testes com falha"){
+       field="taxa de testes que falham";
+       statement="Uma equipe de programação vai avaliar a qualidade de um sistema novo. Em projetos anteriores, cerca de "+pctLocal(c.p)+" dos testes encontraram falhas. O gerente quer saber quantos testes devem ser executados para estimar a porcentagem real de falhas com margem de erro de no máximo "+pctLocal(c.err)+" e nível de confiança de "+c.conf+"%. Quantos testes a equipe precisa planejar?";
+       goal="Decidir quantos testes realizar antes de começar a avaliação do sistema.";
+       context="O gerente precisa de um número mínimo de testes. Quanto menor a margem de erro, mais testes precisará realizar.";
+     }else{
+       field="porcentagem de pessoas com determinada opinião";
+       statement="Um instituto quer fazer uma pesquisa de opinião. Em levantamentos anteriores, aproximadamente "+pctLocal(c.p)+" das pessoas deram a resposta que o instituto está estudando. Agora a equipe deseja fazer uma nova pesquisa para estimar essa porcentagem com margem de erro de "+pctLocal(c.err)+" e confiança de "+c.conf+"%. Antes de começar, quantas pessoas o instituto deverá entrevistar?";
+       goal="Descobrir o número mínimo de entrevistas para uma pesquisa de opinião.";
+       context="Não queremos descobrir quantas pessoas responderam 'sim' ainda; queremos planejar quantas entrevistas faremos.";
+     }
+     tokens={p:pctLocal(c.p),err:pctLocal(c.err),conf:c.conf+"%"};
+   }else if(raw.kind==="sampleMean"){
+     field="tempo médio de resposta de uma API";
+     statement="Uma equipe de tecnologia precisa medir quanto tempo uma API demora, em média, para responder às requisições. Os tempos variam bastante: estudos anteriores apontam desvio padrão de "+format(c.sd,0)+" "+(c.unit||"ms")+". A equipe aceita erro máximo de "+format(c.err,0)+" "+(c.unit||"ms")+" na estimativa da média e deseja "+c.conf+"% de confiança. Quantas requisições ela deve medir antes de calcular a média?";
+     goal="Planejar quantas respostas da API devem ser medidas para estimar o tempo médio.";
+     context="Não é uma pesquisa de porcentagens. Aqui cada teste produz um tempo em milissegundos; a equipe quer estimar a média desses tempos.";
+     tokens={sd:format(c.sd,0),err:format(c.err,0),conf:c.conf+"%"};
+   }else if(raw.kind==="z"){
+     const stories={
+       "Servidor lento":["Um serviço online está sendo monitorado para detectar lentidão. A equipe conhece o tempo de resposta habitual dos servidores e compara um teste recente com esse padrão.","tempo de resposta","Um valor mais alto costuma indicar uma resposta mais lenta."],
+       "Latência de rede":["Um técnico de redes está comparando a latência de uma conexão com a latência que ela costuma apresentar. Ele quer descobrir se a medição de hoje está acima ou abaixo do normal.","latência","Menor latência geralmente significa uma conexão mais rápida."],
+       "Consumo de RAM":["Uma equipe está conferindo se um programa consumiu mais memória RAM que o habitual durante um teste. Ela possui registros anteriores para comparar.","consumo de memória","Um valor muito acima da média pode indicar consumo anormal."],
+       "Pico de acessos":["Uma equipe monitora quantos acessos um site recebe em cada período. Em um intervalo recente houve um pico e ela quer saber o quanto ele se afasta do normal.","número de acessos","Um pico não é necessariamente um problema: pode ser resultado de uma campanha."],
+     };
+     const [story,f,meaning]=stories[title]||["Uma equipe quer verificar se uma medição é comum ou fora do padrão.","valor observado","O sinal indica acima ou abaixo da média."];
+     field=f;context=meaning;
+     statement=story+" A média histórica é "+format(c.mean,Number.isInteger(c.mean)?0:1)+" "+c.unit+", com desvio padrão de "+format(c.sd,Number.isInteger(c.sd)?0:1)+" "+c.unit+". A medição recente foi "+format(c.v,Number.isInteger(c.v)?0:1)+" "+c.unit+". Quantos desvios-padrão ela está acima ou abaixo da média?";
+     goal="Comparar uma medição individual com o comportamento habitual.";
+     tokens={mean:format(c.mean,Number.isInteger(c.mean)?0:1),sd:format(c.sd,Number.isInteger(c.sd)?0:1),value:format(c.v,Number.isInteger(c.v)?0:1)};
+   }
+   return {
+     id:"revisao-"+raw.label+"-"+raw.kind,topic:topicId,type:c.kind,title,statement,
+     source:raw.src||"Exemplo de aula",reconstructed:true,variant:state.settings.values==="random",
+     origin:"pdf",goal,context,field,
      p:c.p,sd:c.sd,err:c.err,conf:c.conf,mean:c.mean,value:c.v,unit:c.unit,
-     tokens:{},generated:true};
+     tokens
+   };
  }
  function excelPage(){
    const filtered=availableCases(excelFilter);
