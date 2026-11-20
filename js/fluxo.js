@@ -98,7 +98,7 @@
      line+='<path d="M'+xp+' '+yp+' V173 M47 '+yp+' H'+xp+'" stroke="#86e8b5" stroke-dasharray="4 5" stroke-width="2"/><circle cx="'+xp+'" cy="'+yp+'" r="8" fill="#83efb6" stroke="#fff" stroke-width="2"/>';
    }
    return '<path d="M40 26V178H531" stroke="#917787" stroke-width="2" fill="none"/>'+line+dots+
-     txt(521,198,"X",12)+txt(27,26,"Y",12)+(selected>=4?txt(64,26,reg?"Y previsto: "+fmt(c.pred,2):"r = "+fmt(c.r,3),16,"#a2ffd1"):"");
+     txt(503,198,"1º dado",11)+txt(14,26,"2º",11)+(selected>=4?txt(64,26,reg?"Y previsto: "+fmt(c.pred,2):"Força: "+fmt(c.r,3),16,"#a2ffd1"):"");
  }
  function sceneSvg(kind,data,selected,stepCount){
    const c=data||{},highlight=selected>=stepCount-2;
@@ -146,7 +146,7 @@
        '<path d="'+path.join(" ")+'" stroke="#ff9cad" stroke-width="3.5" fill="none"/>'+
        '<path d="M'+vx.toFixed(1)+' 35V174" stroke="#8ee7b7" stroke-width="2.5" stroke-dasharray="6 4"/>'+
        '<circle cx="'+vx.toFixed(1)+'" cy="174" r="6" fill="#93f6bd"/>'+
-       txt(290,193,"z = 0",13,"#eee0d9",'text-anchor="middle"')+
+       txt(290,193,"média",13,"#eee0d9",'text-anchor="middle"')+
        txt(44,193,"−3",13)+txt(520,193,"+3",13)+
        txt(290,25,selected>=4?"z = "+fmt(c.z||0,2):"Qual a distância da média?",17,selected>=4?"#9df2bf":"#ffe5dc",'text-anchor="middle"');
    }
