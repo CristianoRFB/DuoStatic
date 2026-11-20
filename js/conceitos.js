@@ -42,7 +42,7 @@
   if(["sampleProp","sampleMean","mean","prop"].includes(t)){
     if(conf!==undefined)add(arr,"O que é nível de confiança?",
       "É uma característica do método de estimação: se fizéssemos muitas pesquisas semelhantes, aproximadamente essa porcentagem dos intervalos calculados conteria o valor verdadeiro. Não é a porcentagem de pessoas que aprovou e não garante a resposta de cada teste.",
-      "Nesta questão o método precisa ter "+number(conf,0)+"% de confiança. Esse valor vem do enunciado e escolhe um número de referência numa tabela. Não é a taxa observada.");
+      "Nesta questão o método usa "+number(conf,0)+"% de confiança PORQUE ESSE VALOR FOI PEDIDO no enunciado. Não vem dos "+(rate!==null?percent(rate)+" de proporção":"valores da média")+". Na tabela da aula, esse nível corresponde a "+number(({90:1.645,95:1.96,99:2.575})[conf]||1.96,3)+". Não é a taxa de sucesso nem a margem de erro.");
     if(t==="sampleProp"||t==="sampleMean"){
       add(arr,"O que é margem de erro?",
        "É o tamanho máximo da imprecisão que aceitamos na estimativa. Quanto menor a margem tolerada, mais observações costumam ser necessárias.",
@@ -144,7 +144,7 @@
         "Somar as porcentagens e chamar o resultado de número de testes",
         "Dividir a confiança pela taxa de falhas e parar",
         "Subtrair o erro máximo da porcentagem histórica e parar"]);
-       step.why="O cálculo combina o valor de referência da confiança multiplicado por ele mesmo; a parte de "+percent(p)+" multiplicada pela parte restante de "+percent(complement)+"; e divide tudo pelo erro máximo multiplicado por ele mesmo. Essas porcentagens entram em decimal.";
+       step.why="Primeiro multiplique o número "+number(({90:1.645,95:1.96,99:2.575})[item.conf]||1.96,3)+" da confiança por ele mesmo. Depois multiplique a parte "+number(p,2)+" pela parte restante "+number(complement,2)+". Multiplique os dois resultados e divida por "+number(e,2)+" multiplicado por ele mesmo. Assim encontramos quantas observações são necessárias, antes de arredondar.";
      }else{
        replaceCorrect("Multiplicar o valor de referência da confiança pelo desvio, dividir pelo erro máximo e multiplicar o resultado por ele mesmo",[
         "Somar a confiança à média e encerrar",
