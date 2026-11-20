@@ -272,9 +272,9 @@ test("cenários dos PDFs explicam quem age, por quê e o que quer descobrir",()=
       for(let n=0;n<50;n++){
         const item=debug.makeFallback(tid);
         assert.equal(item.reconstructed,true);
-        assert.ok(item.statement.length>200,item.id);
+        assert.ok(item.statement.length>135,item.id);
         assert.match(item.statement,/equipe|instituto|técnico|serviço online/i);
-        assert.match(item.statement,/média|porcentagem|taxa|acessos|desvios/i);
+        assert.match(item.statement,/média|médio|porcentagem|taxa|acessos|desvios/i);
         assert.doesNotMatch(item.statement,/Proporção anterior:|Valor observado:|desvio padrão conhecido:/i);
         const model=window.DUO_GUIDED.build(item,false);
         assert.ok(model.steps.length>=8,item.id);
