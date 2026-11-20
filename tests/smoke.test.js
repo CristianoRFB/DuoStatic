@@ -158,7 +158,7 @@ test("biblioteca e lições exibem visualização conectada com cálculos",()=>{
   const {debug,app}=makeApp();
   debug.prepareLesson("amostra",0);
   assert.match(app.innerHTML,/Fluxo do cálculo/);
-  assert.match(app.innerHTML,/Amostra|Calcular n/);
+  assert.match(app.innerHTML,/Calcular quantas observações|Desvio padrão|Tamanho da amostra/);
   debug.go("biblioteca");
   assert.match(app.innerHTML,/calc-sequence/);
 });
