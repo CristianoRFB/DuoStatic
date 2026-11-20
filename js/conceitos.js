@@ -83,12 +83,35 @@
   }
   return arr;
  }
+ function proportionDiagram(v){
+   const p=Math.max(0,Math.min(1,Number(v)||0)),left=number(p*100,0),right=number((1-p)*100,0),first=300*p,second=300-first;
+   return '<svg class="guide-split-svg" viewBox="0 0 340 97" role="img" aria-label="De cada 100 casos, '+left+' pertencem ao grupo estudado e '+right+' ao grupo restante">'+
+     '<rect x="18" y="11" width="300" height="32" rx="6" fill="#4e3848"/>'+
+     '<clipPath id="percent-split"><rect x="18" y="11" width="300" height="32" rx="6"/></clipPath>'+
+     '<g clip-path="url(#percent-split)"><rect x="18" y="11" width="'+first.toFixed(2)+'" height="32" fill="#dc5d72"/>'+
+     '<rect x="'+(18+first).toFixed(2)+'" y="11" width="'+second.toFixed(2)+'" height="32" fill="#73978b"/></g>'+
+     '<circle cx="25" cy="63" r="5" fill="#dc5d72"/><text x="38" y="67" font-family="Georgia,serif" font-size="12" fill="#f7ded5">'+left+' de 100: grupo estudado</text>'+
+     '<circle cx="25" cy="82" r="5" fill="#73978b"/><text x="38" y="86" font-family="Georgia,serif" font-size="12" fill="#f7ded5">'+right+' de 100: grupo restante</text></svg>';
+ }
+ function topicProcedure(id){
+   return ({
+     amostra:"Primeiro descubra se você quer estimar uma porcentagem ou uma média. Depois identifique a precisão permitida, o nível de confiança e a variabilidade. Combine esses dados e arredonde o número mínimo de observações para cima.",
+     prop:"Identifique o total observado e quantos fazem parte do grupo estudado. Divida a parte pelo total para obter a porcentagem. Calcule a margem usando a confiança e monte a faixa, subtraindo e somando a margem.",
+     media:"Identifique a média, o desvio padrão, o total de observações e a confiança. Calcule a margem de erro e subtraia e some essa margem à média para encontrar a faixa.",
+     corr:"Leia as duas colunas de números como pares. Observe se crescem juntas ou em direções opostas. Depois interprete a direção e a intensidade da relação; uma relação não prova causa.",
+     reg:"Descubra qual variável você já conhece e qual quer prever. Ajuste a reta a partir dos pares de dados e use o valor conhecido para obter uma estimativa, respeitando a faixa observada.",
+     z:"Identifique a medição atual, a média habitual e o desvio padrão. Subtraia a média da medição e divida pelo desvio. O sinal mostra se está acima ou abaixo da média; a distância mostra quanto difere."
+   })[id]||"Leia o que a questão quer descobrir; identifique os valores disponíveis e faça cada operação de forma justificada.";
+ }
  function glossary(model){
   const data=terms(model);
   if(!data.length)return "";
   return '<details class="guide-glossary"><summary><span>▤ Entender os termos deste exercício</span><small>'+data.length+' explicações que você pode abrir</small></summary>'+
    '<div class="guide-glossary-list">'+data.map((t,i)=>
-      '<details class="guide-definition"><summary>'+esc(t.title)+'</summary><div><p>'+esc(t.meaning)+'</p><p class="guide-specific"><strong>Nesta questão:</strong> '+esc(t.here)+'</p></div></details>'
+      '<details class="guide-definition"><summary>'+esc(t.title)+'</summary><div><p>'+esc(t.meaning)+'</p><p class="guide-specific"><strong>Nesta questão:</strong> '+esc(t.here)+'</p>'+
+      ((/porcentagem ou proporção/.test(t.title) && ["sampleProp","prop"].includes(model.item.type)) ?
+        proportionDiagram(model.item.type==="sampleProp"?model.item.p:(model.item.rate??(model.item.success/model.item.n))):"")+
+      '</div></details>'
    ).join("")+'</div></details>';
  }
  // As alternativas que exigem escolher uma CONTA são escritas em palavras.
@@ -218,5 +241,5 @@
    step.guide=clean(step.guide||"");
    return step;
  }
- window.DUO_PLAIN={terms,glossary,plainStep};
+ window.DUO_PLAIN={terms,glossary,plainStep,topicProcedure,proportionDiagram};
 })();
