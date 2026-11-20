@@ -92,3 +92,14 @@
  .guide-intro-card .quick-actions{flex-direction:column}
  .guide-intro-card .quick-actions .btn{width:100%}
 }
+
+
+/* Dados do Excel permanecem disponíveis sob demanda, sem ocupar a tela do quiz. */
+.guide-source-data{background:#201a22;border:1px solid #5c3d48;border-radius:11px;margin-top:10px;overflow:hidden}
+.guide-source-data>summary{padding:11px 14px;cursor:pointer;color:#e9bcb6;font-size:.84rem}
+.guide-table-scroll{overflow:auto;max-height:260px;margin:0 12px 8px;border-radius:8px;border:1px solid #5b414a;scrollbar-width:thin}
+.guide-table-scroll table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:.81rem}
+.guide-table-scroll th{position:sticky;top:0;background:#573040;color:#ffe5d8;text-align:left;padding:8px 11px}
+.guide-table-scroll td{padding:7px 11px;border-bottom:1px solid #483440;color:#e5d7d2}
+.guide-table-scroll tr:nth-child(even){background:#2a2029}
+.guide-source-data>p{font-size:.73rem;color:#b99fa1;padding:0 13px 10px;margin:0}
