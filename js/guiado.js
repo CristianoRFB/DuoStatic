@@ -172,6 +172,21 @@
    return {item,translation:"O exercício quer estimar a porcentagem real de "+item.field+" a partir de uma amostra. Precisamos transformar casos em porcentagem, calcular a margem e interpretar a faixa.",steps:s,result:limits(p,margin,true),meaning:end.correct,visual:"proporcao",calc:{kind:"prop",success:item.success,n:item.n,p,conf:item.conf,z,margin,lo,hi}};
  }
  const datasetSex=["M","F","M","F","F","F","M","M","M","M","F","M","M","M","F","M","M","F","F","M","M","M","F","F","M","F","F","M","F","M"];
+ const employeeData=[[40,3,"Médio",3400,3,"Sim"],[25,2,"Superior",4300,1,"Sim"],[32,2,"Médio",3500,0,"Sim"],[30,1,"Superior",5000,0,"Sim"],[34,2,"Fundamental",1621,1,"Sim"],[20,1,"Fundamental",1621,0,"Não"],[22,3,"Médio",3578,0,"Não"],[21,3,"Fundamental",1621,0,"Não"],[31,3,"Superior",4705,1,"Sim"],[18,1,"Fundamental",1621,0,"Não"],[30,2,"Médio",3450,1,"Sim"],[41,2,"Médio",3350,1,"Sim"],[36,3,"Médio",2500,2,"Sim"],[27,2,"Fundamental",1621,1,"Sim"],[43,3,"Superior",6000,3,"Sim"],[37,2,"Médio",2800,2,"Sim"],[50,2,"Médio",2900,3,"Sim"],[27,3,"Fundamental",1621,1,"Não"],[25,2,"Fundamental",1621,2,"Não"],[24,1,"Médio",2300,1,"Sim"],[25,1,"Superior",4500,1,"Sim"],[41,1,"Médio",2570,1,"Sim"],[20,2,"Fundamental",1621,0,"Não"],[33,1,"Médio",2350,2,"Sim"],[45,4,"Superior",6300,3,"Sim"],[23,1,"Fundamental",1621,2,"Não"],[35,2,"Médio",2450,1,"Sim"],[55,4,"Superior",7250,4,"Sim"],[23,1,"Médio",2800,0,"Sim"],[27,1,"Médio",2900,2,"Não"],[30,3,"Médio",3100,1,"Sim"]];
+ function sourceTable(item){
+   let rows=[],heads=[],description="";
+   if(item.dataset==="usuarios"){
+     const t=window.STUDY_DATA;
+     heads=["Sexo","Idade","Horas/semana"];
+     rows=t.excelAges.map((age,i)=>[datasetSex[i],age,t.excelHours[i]]);
+     description="30 registros de Correlação e Regressão Linear.xlsx";
+   }else if(item.source&&item.source.includes("Tabela Slide.xlsx")){
+     heads=["Idade","Serviço (anos)","Escolaridade","Salário R$","Dependentes","Automóvel"];
+     rows=employeeData;
+     description="31 registros de Tabela Slide.xlsx";
+   }else return "";
+   return '<details class="guide-source-data"><summary>Consultar a tabela original ('+rows.length+' registros)</summary><div class="guide-table-scroll"><table><thead><tr>'+heads.map(h=>'<th>'+esc(h)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+esc(x)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div><p>'+esc(description)+'</p></details>';
+ }
  function stats(){
    const t=window.STUDY_DATA,ages=t.excelAges,hours=t.excelHours,n=hours.length;
    const avg=a=>a.reduce((sum,v)=>sum+v,0)/a.length;
@@ -382,7 +397,7 @@
     '<div class="guide-top"><span class="pill">'+esc(model.item.source)+' '+(model.item.variant?"· Valores alterados":"· Dados originais")+'</span><span class="guide-count">'+(session.index+1)+'/'+total+'</span></div>'+
     '<div class="guide-progress" role="progressbar" aria-valuenow="'+(session.index+(success?1:0))+'" aria-valuemin="0" aria-valuemax="'+total+'"><span style="width:'+progress.toFixed(1)+'%"></span></div>'+
     '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement">'+enunciado(model.item,session.revealed)+'</div>'+
-    '<div class="guide-translation"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
+    sourceTable(model.item)+'<div class="guide-translation"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
     '<div class="guide-current"><span class="guide-label">PASSO '+(session.index+1)+'</span><h2>'+esc(cur.question)+'</h2>'+
     '<div class="guide-choices" role="group" aria-label="Alternativas do passo">'+cur.options.map((o,i)=>'<button class="guide-choice '+(success?(i===cur.right?"guide-correct":"guide-dim"):incorrect===i?"guide-wrong":"")+'" data-action="guided-answer" data-choice="'+i+'" '+(success?"disabled":"")+'><b>'+String(i+1)+'</b><span>'+esc(o)+'</span></button>').join("")+'</div>'+
     (success?'<div class="guide-feedback good" role="status"><strong>Correto.</strong> '+esc(cur.why)+'</div>':incorrect!==null?'<div class="guide-feedback wrong" role="status">Não é essa. '+esc(session.wrongHint||"Releia o pedido e tente outra alternativa.")+'</div>':"")+
