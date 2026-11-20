@@ -385,7 +385,7 @@
       "Provar que a porcentagem histórica nunca mudará","Confirmar que não existirão erros nos testes"],
      "A conta determina a quantidade mínima para o plano de pesquisa, sob as hipóteses usadas; ela não prevê o resultado exato de cada teste.",["meaning"],
      "O resultado é uma QUANTIDADE de medições, não uma porcentagem."));
-   return {item,translation:(item.goal||("A pergunta é "+questionQuantity.toLowerCase()+" "+task+" realizar."))+" Primeiro vamos entender os números; só depois escolheremos a conta.",
+   return {item,translation:(item.goal||("Precisamos descobrir "+questionQuantity.toLowerCase()+" "+task+" realizar.")),
      steps:s,result:fmt(n,0)+" observações",
      meaning:"A equipe deverá coletar pelo menos "+fmt(n,0)+" "+task+" para buscar a precisão definida, se as condições do planejamento forem atendidas.",
      visual:"amostra",calc:{kind:isP?"sampleProp":"sampleMean",n,raw,p:item.p,sd:item.sd,err:item.err,conf:item.conf,z}};
