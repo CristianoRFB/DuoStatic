@@ -318,9 +318,16 @@
  }
  function intro(){
    const {topic:tid,stage}=state.session,t=topic(tid);
-   return '<div class="view"><button class="back" data-nav="trilha">‹ Voltar à trilha</button><p class="eyebrow">TERRITÓRIO '+t.number+' · ETAPA '+(stage+1)+' DE 4</p><div class="story"><div class="story-card"><span class="pill">'+t.icon+' '+esc(t.stages[stage])+'</span><h1 style="margin-top:16px">'+t.title+'</h1><h3 style="color:var(--gold)">O que é?</h3><p>'+t.what+'</p><h3 style="color:var(--gold)">Para que serve?</h3><p>'+t.function+'</p><h3 class="gold">Pra que serve (no português claro)?</h3><p class="plain-explainer">'+esc(t.plain)+'</p><div class="notice">Imagine: '+t.analogy+'</div></div><div class="story-diagram">'+draw(t.visual)+'<span class="pill">Pense visualmente</span><p class="muted tiny">'+esc(t.short)+'</p><img src="assets/arle-sentada.webp" alt="Arlecchino chibi sentada, acompanhando a explicação" class="intro-mascot" loading="lazy" decoding="async"></div></div>'+
-   '<div class="section-top"><div><h2>Como reconhecer?</h2><p>Este é o caminho de decisão para os exercícios.</p></div></div><div class="surface"><p><strong class="gold">Palavras-pista:</strong> '+t.cue+'</p>'+flow(t.steps)+'<div class="formula-box"><strong>Fórmula só depois de entender</strong><code>'+esc(t.formula)+'</code></div><div class="notice"><strong>Armadilha clássica:</strong> '+t.trap+'</div></div>'+
-   lab(t.id,getDemo(t.id))+'<div class="quick-actions"><button class="btn btn-quiet" data-nav="biblioteca">Consultar biblioteca</button><button class="btn btn-primary" data-action="begin">Entendi · testar agora ›</button></div></div>';
+   return '<div class="view guide-intro-page"><button class="back" data-nav="trilha">‹ Voltar à trilha</button>'+
+    '<p class="eyebrow">TERRITÓRIO '+t.number+' · ETAPA '+(stage+1)+' / 4</p>'+
+    '<section class="guide-intro-card"><div class="guide-intro-head"><div><span class="pill">'+t.icon+' '+esc(t.title)+'</span><h1>'+esc(t.stages[stage])+'</h1></div><img src="assets/arle-sentada.webp" alt="Arlecchino acompanhando a lição" loading="lazy"></div>'+
+    '<h2>O que é?</h2><p>'+esc(t.what)+'</p><h2>Pra que serve (no português claro)?</h2><p>'+esc(t.plain)+'</p>'+
+    '<div class="guide-intro-clue"><strong>Como reconhecer no enunciado:</strong><p>'+esc(t.cue)+'</p></div>'+
+    '<details class="guide-more"><summary>Ver fórmula, exemplo e fluxo do cálculo</summary><p>'+esc(t.analogy)+'</p>'+lab(t.id,getDemo(t.id))+
+      '<div class="formula-box"><strong>Fórmula quando for necessária</strong><code>'+esc(t.formula)+'</code></div>'+
+      '<div class="notice"><strong>Cuidado:</strong> '+esc(t.trap)+'</div></details>'+
+    '<div class="quick-actions"><button class="btn btn-quiet" data-nav="biblioteca">Biblioteca</button><button class="btn btn-primary" data-action="begin">Começar exercício guiado ›</button></div>'+
+    '</section></div>';
  }
  function renderQuiz(){
    const s=state.session,q=s.question,t=topic(q.t);
