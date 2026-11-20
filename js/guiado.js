@@ -109,9 +109,11 @@
  function buildMean(item){
    const z=zValue(item.conf),margin=z*item.sd/Math.sqrt(item.n),lo=item.mean-margin,hi=item.mean+margin;
    const s=[];
-   s.push(step("Qual é a missão do exercício?","Calcular uma faixa para a média da população",
-     ["Calcular uma taxa de defeito","Prever um Y pela idade","Descobrir quantas pessoas entrevistar"],
-     "Ele já trouxe média e desvio de uma amostra. O pedido é um intervalo para a média.",[]));
+    s.push(step("A pessoa já mediu parte do grupo. O que ela quer descobrir agora?",
+     "Entre quais valores pode estar a média do grupo inteiro",
+     ["O valor exato de cada pessoa observada","Quantas pessoas ainda devem ser entrevistadas","Qual é o maior resultado possível para toda a população"],
+     "Como só foi observada uma amostra, a média dessa amostra é uma pista. O intervalo de confiança dá uma faixa plausível para a média de toda a população.",[],
+     "Não precisamos prever cada pessoa. Queremos estimar a MÉDIA de um grupo maior."));
    s.push(intStep("Qual número informa o tamanho da amostra (n)?",item.n,"n é a quantidade de observações coletadas.",["n"]));
    s.push(numStep("Qual valor é a média amostral?",item.mean,item.unit,"A média vai ficar no centro do intervalo.",["mean"],2));
    s.push(numStep("Qual valor mede a dispersão (desvio padrão)?",item.sd,item.unit,"O desvio diz quanto os valores variam entre si.",["sd"],2));
@@ -128,15 +130,17 @@
      "Subtraia a margem da média e também some a margem.",["result"]));
    const end=compareMeaning(item,lo,hi);
    s.push(step(item.target!==undefined||item.threshold==="old-sample"?"O que esse resultado permite concluir?":"O que esse intervalo significa?",end.correct,end.wrong,end.why,["meaning"]));
-   return {item,translation:"Ele quer usar uma média medida em "+item.n+" observações para encontrar uma FAIXA plausível para a média de toda a população. Não é uma previsão exata.",steps:s,result:limits(item.mean,margin,false)+" "+item.unit,meaning:end.correct,visual:"media",calc:{kind:"mean",mean:item.mean,sd:item.sd,n:item.n,conf:item.conf,z,lo,hi,margin,unit:item.unit}};
+   return {item,translation:(item.context?item.context+" ":"")+"Em palavras simples: ele quer uma faixa para a média verdadeira, usando as "+item.n+" medições. Não quer a resposta exata de cada pessoa.",steps:s,result:limits(item.mean,margin,false)+" "+item.unit,meaning:end.correct,visual:"media",calc:{kind:"mean",mean:item.mean,sd:item.sd,n:item.n,conf:item.conf,z,lo,hi,margin,unit:item.unit}};
  }
  function buildProp(item){
    const z=zValue(item.conf),p=item.rate!==undefined?item.rate:item.success/item.n;
    const se=Math.sqrt(p*(1-p)/item.n),margin=z*se,lo=p-margin,hi=p+margin;
    const s=[];
-   s.push(step("O que a questão quer descobrir?","A faixa possível para uma porcentagem da população",
-     ["A média de idades","A previsão de horas pela idade","O número de observações para uma futura pesquisa"],
-     "O enunciado fala em quantos atendem a um critério dentro de um total.",[]));
+   s.push(step("O estudo observou uma parte do grupo. O que quer saber sobre o grupo inteiro?",
+     "Entre quais porcentagens pode estar a taxa verdadeira",
+     ["O resultado exato de cada pessoa","Quantas pessoas devem ser entrevistadas em outra pesquisa","Quanto vale a média de todos os salários"],
+     "A porcentagem vista na amostra é uma pista. O intervalo de confiança estima uma faixa para a porcentagem da população.",[],
+     "Aqui o resultado é uma PORCENTAGEM. Porcentagem é uma parte de 100."));
    s.push(intStep("Qual é o tamanho da amostra n?",item.n,
      "n é o TOTAL de observações, não o número de casos favoráveis.",["n"]));
    if(item.fail!==undefined){
@@ -169,7 +173,7 @@
      "IC = p − E até p + E. Converta os dois limites em porcentagem.",["result"]));
    const end=compareMeaning(item,lo,hi);
    s.push(step(item.target!==undefined?"O que significa para a decisão?":"O que esse intervalo permite afirmar?",end.correct,end.wrong,end.why,["meaning"]));
-   return {item,translation:"O exercício quer estimar a porcentagem real de "+item.field+" a partir de uma amostra. Precisamos transformar casos em porcentagem, calcular a margem e interpretar a faixa.",steps:s,result:limits(p,margin,true),meaning:end.correct,visual:"proporcao",calc:{kind:"prop",success:item.success,n:item.n,p,conf:item.conf,z,margin,lo,hi}};
+   return {item,translation:(item.context?item.context+" ":"")+"A tarefa é estimar a porcentagem real de "+item.field+". Primeiro identificamos quem entra na contagem; depois encontramos uma faixa plausível.",steps:s,result:limits(p,margin,true),meaning:end.correct,visual:"proporcao",calc:{kind:"prop",success:item.success,n:item.n,p,conf:item.conf,z,margin,lo,hi}};
  }
  const datasetSex=["M","F","M","F","F","F","M","M","M","M","F","M","M","M","F","M","M","F","F","M","M","M","F","F","M","F","F","M","F","M"];
  const employeeData=[[40,3,"Médio",3400,3,"Sim"],[25,2,"Superior",4300,1,"Sim"],[32,2,"Médio",3500,0,"Sim"],[30,1,"Superior",5000,0,"Sim"],[34,2,"Fundamental",1621,1,"Sim"],[20,1,"Fundamental",1621,0,"Não"],[22,3,"Médio",3578,0,"Não"],[21,3,"Fundamental",1621,0,"Não"],[31,3,"Superior",4705,1,"Sim"],[18,1,"Fundamental",1621,0,"Não"],[30,2,"Médio",3450,1,"Sim"],[41,2,"Médio",3350,1,"Sim"],[36,3,"Médio",2500,2,"Sim"],[27,2,"Fundamental",1621,1,"Sim"],[43,3,"Superior",6000,3,"Sim"],[37,2,"Médio",2800,2,"Sim"],[50,2,"Médio",2900,3,"Sim"],[27,3,"Fundamental",1621,1,"Não"],[25,2,"Fundamental",1621,2,"Não"],[24,1,"Médio",2300,1,"Sim"],[25,1,"Superior",4500,1,"Sim"],[41,1,"Médio",2570,1,"Sim"],[20,2,"Fundamental",1621,0,"Não"],[33,1,"Médio",2350,2,"Sim"],[45,4,"Superior",6300,3,"Sim"],[23,1,"Fundamental",1621,2,"Não"],[35,2,"Médio",2450,1,"Sim"],[55,4,"Superior",7250,4,"Sim"],[23,1,"Médio",2800,0,"Sim"],[27,1,"Médio",2900,2,"Não"],[30,3,"Médio",3100,1,"Sim"]];
@@ -303,7 +307,7 @@
      extrapolation:"O exercício quer que você diga se prever para 70 anos faz sentido, considerando a faixa estudada.",
      reverseRegression:"O exercício quer a idade aproximada para quem acessa por 50 horas. Agora a variável que queremos prever é a idade."
    };
-   const translation=descriptions[mode]||"Leia o enunciado e identifique a pergunta antes de escolher a conta.";
+   const translation=(item.context?item.context+" ":"")+(descriptions[mode]||"Leia o pedido e escolha uma operação de cada vez.");
    return {item,translation,steps:s,result,meaning:item.explanation,visual,calc};
  }
  function buildSample(item){
@@ -485,10 +489,13 @@
    const success=session.answered===true,incorrect=session.wrong;
    const compact=session.index>0&&!session.expanded;
    const sourceShort=model.item.source.includes("xlsx")?"Excel · "+(model.item.source.split(" · ")[1]||"Exercício"):model.item.source;
+   const originLabel=model.item.reconstructed?
+     (model.item.variant?"· Exemplo adaptado":"· Situação recriada; números do material"):
+     (model.item.variant?"· Valores de treino":"· Exercício da planilha");
    const visual=(session.index>=Math.max(2,total-3) && model.visual!=="none" && window.DUO_FLOW)?
      '<details class="guide-visual"><summary>Ver desenho deste cálculo</summary><div>'+window.DUO_FLOW.sceneSvg(model.visual,model.calc,total-1,total)+'</div></details>':"";
    return '<div class="view guide-view"><button class="back" data-action="guided-exit">‹ Voltar aos exercícios</button>'+
-    '<div class="guide-top"><span class="pill">'+esc(sourceShort)+' '+(model.item.variant?"· Valores alterados":"· Dados originais")+'</span><span class="guide-count">'+(session.index+1)+'/'+total+'</span></div>'+
+    '<div class="guide-top"><span class="pill">'+esc(sourceShort)+' '+esc(originLabel)+'</span><span class="guide-count">'+(session.index+1)+'/'+total+'</span></div>'+
     '<div class="guide-progress" role="progressbar" aria-valuenow="'+(session.index+(success?1:0))+'" aria-valuemin="0" aria-valuemax="'+total+'"><span style="width:'+progress.toFixed(1)+'%"></span></div>'+
     '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement '+(compact?"is-compact":"")+'">'+enunciado(model.item,session.revealed)+'</div>'+
     (session.index>0?'<button type="button" class="guide-expand-text" data-action="guided-expand">'+(session.expanded?"Recolher enunciado":"Ver enunciado completo")+"</button>":"" )+
