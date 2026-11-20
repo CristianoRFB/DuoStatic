@@ -398,7 +398,7 @@
    return '<div class="view guide-view"><button class="back" data-action="guided-exit">‹ Voltar aos exercícios</button>'+
     '<div class="guide-top"><span class="pill">'+esc(sourceShort)+' '+(model.item.variant?"· Valores alterados":"· Dados originais")+'</span><span class="guide-count">'+(session.index+1)+'/'+total+'</span></div>'+
     '<div class="guide-progress" role="progressbar" aria-valuenow="'+(session.index+(success?1:0))+'" aria-valuemin="0" aria-valuemax="'+total+'"><span style="width:'+progress.toFixed(1)+'%"></span></div>'+
-    '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement '+(compact?"is-compact":"")+'+">'+enunciado(model.item,session.revealed)+'</div>'+
+    '<div class="guide-card"><h1>'+esc(model.item.title)+'</h1><p class="guide-label">ENUNCIADO</p><div class="guide-statement '+(compact?"is-compact":"")+'">'+enunciado(model.item,session.revealed)+'</div>'+
     (session.index>0?'<button type="button" class="guide-expand-text" data-action="guided-expand">'+(session.expanded?"Recolher enunciado":"Ver enunciado completo")+"</button>":"" )+
     sourceTable(model.item)+'<div class="guide-translation '+(compact?"is-compact":"")+'"><strong>Tradução do enunciado</strong><p>'+esc(model.translation)+'</p></div>'+
     '<div class="guide-current"><span class="guide-label">PASSO '+(session.index+1)+'</span><h2>'+esc(cur.question)+'</h2>'+
