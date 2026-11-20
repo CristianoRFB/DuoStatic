@@ -370,6 +370,13 @@
      ["Que "+item.conf+"% dos testes darão certo","Que a resposta será exatamente igual ao valor real","Que "+item.conf+"% dos participantes concordam com a pesquisa"],
      "Se repetíssemos muitas pesquisas semelhantes, cerca de "+item.conf+"% dos intervalos calculados por esse método conteriam o valor verdadeiro. A confiança também indica qual número usar na tabela da aula.",["conf"],
      "Confiança é sobre o MÉTODO da pesquisa. Não é a porcentagem de testes que passarão."));
+   const referenceValues=[["90%",1.645],["95%",1.96],["99%",2.575]];
+   const current=referenceValues.find(v=>v[0]===item.conf+"%")||referenceValues[1];
+   s.push(step("Qual número da tabela da aula corresponde à confiança de "+item.conf+"%?",
+     fmt(current[1],3),
+     referenceValues.filter(v=>v[0]!==current[0]).map(v=>fmt(v[1],3)).concat(["0,500"]),
+     "Essa tabela já faz parte do método da aula: 90% usa 1,645; 95% usa 1,960; e 99% usa 2,575. O nível de confiança vem do enunciado, não é calculado a partir da taxa anterior.",[],
+     "Aqui você não precisa decorar uma fórmula: apenas localizar "+item.conf+"% na tabela dos valores de confiança."));
    if(isP){
      s.push(step("Como escrever as duas porcentagens para calcular?",
        "Proporção p = "+fmt(item.p,2)+" e erro E = "+fmt(item.err,2),
@@ -391,7 +398,7 @@
      n,"A conta resulta em "+fmt(raw,2)+". Como não existe fração de "+(opinion?"entrevista":"teste")+
      ", arredondamos para cima: "+fmt(n,0)+".",["result"]," "+task));
    s.push(step("No final, o número "+fmt(n,0)+" serve para quê?",
-     "Planejar PELO MENOS "+fmt(n,0)+" observações com a precisão escolhida",
+     "Planejar PELO MENOS "+fmt(n,0)+" "+task+" com a precisão escolhida",
      ["Garantir que exatamente "+fmt(n,0)+" observações darão o mesmo resultado",
       "Provar que a porcentagem histórica nunca mudará","Confirmar que não existirão erros nos testes"],
      "A conta determina a quantidade mínima para o plano de pesquisa, sob as hipóteses usadas; ela não prevê o resultado exato de cada teste.",["meaning"],
