@@ -340,6 +340,17 @@
        ["O próximo teste obrigatoriamente dará falha","Exatamente "+fmt(item.p*100,0)+" pessoas precisam ser entrevistadas","A pesquisa já está concluída"],
        "A taxa anterior é uma referência, não uma certeza sobre os próximos testes. Em estatística, chamamos essa proporção esperada de p.",["p"],
        "Porcentagem é uma parte de 100: 15% significa 15 em cada 100."));
+   const remaining=1-item.p;
+   const alternatives=[
+     pct(Math.max(.01,remaining-.13),0),
+     pct(Math.max(.01,item.p/2),0),
+     pct(Math.min(.99,remaining+.11),0)
+   ];
+   s.push(step("Se "+pct(item.p,0)+" representam a parte estudada, qual porcentagem é o RESTANTE?",
+     pct(remaining,0),alternatives,
+     "O todo equivale a 100%. Subtraímos "+pct(item.p,0)+" de 100% e encontramos "+pct(remaining,0)+
+     ". Esse restante entra na conta da quantidade mínima de observações. Não significa que somente "+pct(item.p,0)+" das pessoas foram analisadas.",
+     [],"Imagine 100 casos: "+fmt(item.p*100,0)+" fazem parte do grupo estudado. Quantos dos 100 ficam de fora?"));
    }else{
      s.push(step("O desvio padrão anterior é "+fmt(item.sd,0)+" "+(item.unit||"ms")+". O que ele descreve?",
        "O quanto os tempos costumam variar de uma requisição para outra",
